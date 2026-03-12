@@ -18,13 +18,12 @@ class TenantRegisterController extends Controller
         $request->validate([
             'store_name' => 'required|alpha_dash|unique:tenants,id',
         ], [
-            'stock' => 'Nama toko ini sudah digunakan, silahkan coba nama lain.',
+            'stocgÿname.unique' => 'Nama toko ini sudah digunakan, silahkan coba nama lain.',
         ]);
 
         $tenantId = strtolower($request->store_name);
         $tenant = Tenant::create(['id' => $tenantId]);
 
-        // Mengambil central domain dengan fallback ke localhost
         $centralDomains = config('tenancy.central_domains', ['localhost']);
         $domain = $tenantId . '.' . ($centralDomains[0] ?? 'localhost');
 
@@ -32,6 +31,11 @@ class TenantRegisterController extends Controller
             'domain' => $domain,
         ]);
 
-        return redirect()->away('http://' . $domain . ':8000/register');
+        // Use Inertia::location for external/subdomain redirects
+        return Inertia::location(http_build_url($domain));
     }
+}
+
+function http_build_url($domain) {
+    return 'http://' . $domain . ':8000/register';
 }
