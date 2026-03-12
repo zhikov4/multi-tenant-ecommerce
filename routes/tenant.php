@@ -12,7 +12,7 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
-    // Katalog Publik untuk Pembeli
+    // Tampilan Publik Buyer
     Route::get('/', function () {
         return Inertia::render('Shop/Catalog', [
             'products' => Product::all(),
@@ -21,7 +21,7 @@ Route::middleware([
         ]);
     })->name('tenant.catalog');
 
-    // Panel khusus Seller/Admin Toko
+    // Tampilan Dashboard Seller
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () { return redirect()->route('products.index'); })->name('dashboard');
         Route::resource('products', ProductController::class);

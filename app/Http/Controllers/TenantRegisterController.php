@@ -15,7 +15,6 @@ class TenantRegisterController extends Controller {
     public function store(Request $request) {
         $request->validate(['store_name' => 'required|alpha_dash|unique:tenants,id']);
         $tenantId = strtolower($request->store_name);
-        // Satu user bisa buat banyak toko (multi-store ownership)
         $tenant = Tenant::create(['id' => $tenantId, 'user_id' => Auth::id()]);
         $tenant->domains()->create(['domain' => $tenantId . '.localhost']);
         return back();

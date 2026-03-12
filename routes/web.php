@@ -4,7 +4,6 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Halaman utama Landlord untuk pencarian toko
 Route::get('/', [TenantRegisterController::class, 'index'])->name('central.home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
