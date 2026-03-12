@@ -1,10 +1,15 @@
 <?php
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TenantRegisterController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-foreach (config('tenancy.central_domains', ['localhost', '127.0.0.1']) as $domain) {
-    Route::domain($domain)->group(function () {
-        Route::get('/', [TenantRegisterController::class, 'show'])->name('central.home');
-        Route::post('/onboarding', [TenantRegisterController::class, 'store'])->name('central.tenant.store');
-    });
-}
+// Halaman utama Landlord untuk pencarian toko
+Route::get('/', [TenantRegisterController::class, 'index'])->name('central.home');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/tenants', [TenantRegisterController::class, 'store'])->name('central.tenant.store');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+});
+
+require __DIR__.'/auth.php';

@@ -1,22 +1,17 @@
 <?php
-
 declare(strict_types=1);
-
-use App\Models\Tenant;
-
 return [
-    'tenant_model' => Tenant::class,
-    'id_generator' => Stancl\Tenancy\UUIDGenerator::class,
-    'domain_model' => Stancl\Tenancy\Database\Models\Domain::class,
+    'tenant_model' => \App\Models\Tenant::class,
+    'id_generator' => \Stancl\Tenancy\UUIDGenerator::class,
     'central_domains' => [
-        '127.0.0.1',
         'localhost',
+        '127.0.0.1',
     ],
     'bootstrappers' => [
-        Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper::class,
-        Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
-        Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper::class,
-        Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper::class,
+        \Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper::class,
+        \Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
+        \Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper::class,
+        \Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper::class,
     ],
     'database' => [
         'central_connection' => 'mysql',
@@ -24,24 +19,8 @@ return [
         'prefix' => 'tenant',
         'suffix' => '',
         'managers' => [
-            'mysql' => 'Stancl\Tenancy\TenantDatabaseManagers\MySQLDatabaseManager',
+            'mysql' => \Stancl\Tenancy\Database\TenantDatabaseManagers\MySQLDatabaseManager::class,
         ],
     ],
-    'cache' => [
-        'tag_base' => 'tenant',
-    ],
-    'filesystem' => [
-        'suffix_base' => 'tenant',
-        'disks' => [
-            'local',
-            'public',
-        ],
-        'root_override' => [
-            'local' => 'tenant%storage_key%',
-            'public' => 'public/tenant%storage_key%',
-        ],
-    ],
-    'features' => [
-        Stancl\Tenancy\Features\ViteBundler::class,
-    ],
+    'routes' => true,
 ];
