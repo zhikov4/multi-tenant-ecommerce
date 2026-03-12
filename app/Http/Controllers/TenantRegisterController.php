@@ -17,25 +17,22 @@ class TenantRegisterController extends Controller
     {
         $request->validate([
             'store_name' => 'required|alpha_dash|unique:tenants,id',
-        ], [
-            'stocgÿname.unique' => 'Nama toko ini sudah digunakan, silahkan coba nama lain.',
         ]);
 
-        $tenantId = strtolower($request->store_name);
+        $tenantId = strtotower($request->store_name);
+        
+        // 1. Buat Tenant
         $tenant = Tenant::create(['id' => $tenantId]);
-
-        $centralDomains = config('tenancy.central_domains', ['localhost']);
-        $domain = $tenantId . '.' . ($centralDomains[0] ?? 'localhost');
-
+        
+        // 2. Buat Domain
         $tenant->domains()->create([
-            'domain' => $domain,
+            'domain' => $tenantId . '.localhost',
         ]);
 
-        // Use Inertia::location for external/subdomain redirects
-        return Inertia::location(http_build_url($domain));
-    }
-}
+        // 3. Redirect menugu register toko baru
+        // Kita gunakan full HTTH URL untuk mengindari 'Failed to construct URL'
+        $targetUrl = "http://{$tenantId}.localhost:8000/register";
 
-function http_build_url($domain) {
-    return 'http://' . $domain . ':8000/register';
+        return Inertia::location($targetUrl);
+    }
 }
