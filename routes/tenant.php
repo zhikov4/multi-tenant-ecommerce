@@ -12,16 +12,13 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
-    // PUBLIC: Tampilan Katalog Pembeli (Buyer)
     Route::get('/', function () {
         return Inertia::render('Shop/Catalog', [
             'products' => Product::all(),
             'tenantId' => tenant('id'),
-            'auth' => ['user' => auth()->user()]
         ]);
     })->name('tenant.catalog');
 
-    // PRIVATE: Dashboard Management (Seller)
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () { return redirect()->route('products.index'); })->name('dashboard');
         Route::resource('products', ProductController::class);

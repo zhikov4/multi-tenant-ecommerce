@@ -7,5 +7,5 @@ use Stancl\Tenancy\Database\Concerns\HasDomains;
 
 class Tenant extends BaseTenant implements TenantWithDatabase {
     use HasDatabase, HasDomains;
-    protected $fillable = ['id', 'user_id', 'data']; // user_id untuk menandai pemilik
+    protected $fillable = ['id', 'user_id', 'data']; // user_id untuk link ke seller pusat
 }
