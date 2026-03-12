@@ -2,6 +2,7 @@
 declare(strict_types=1);
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -10,14 +11,8 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
-    Route::get('/', function () {
-        return redirect()->route('products.index');
-    })->name('tenant.home');
-
-    // Alias dashboard agar tidak error saat Login/Register
-    Route::get('/dashboard', function () {
-        return redirect()->route('products.index');
-    })->name('dashboard');
+    Route::get('/', function () { return redirect()->route('products.index'); });
+    Route::get('/dashboard', function () { return redirect()->route('products.index'); })->name('dashboard');
 
     Route::middleware('auth')->group(function () {
         Route::resource('products', ProductController::class)->names([
@@ -25,6 +20,12 @@ Route::middleware([
             'store' => 'products.store',
             'destroy' => 'products.destroy',
         ]);
+        
+        // Halaman Sales Report (Sederhana)
+        Route::get('/sales-report', function () {
+            return Inertia::render('Sales/Report');
+        })->name('sales.report');
     });
+
     require __DIR__.'/auth.php';
 });
