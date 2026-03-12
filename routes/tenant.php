@@ -14,6 +14,11 @@ Route::middleware([
         return redirect()->route('products.index');
     })->name('tenant.home');
 
+    // Alias dashboard agar tidak error saat Login/Register
+    Route::get('/dashboard', function () {
+        return redirect()->route('products.index');
+    })->name('dashboard');
+
     Route::middleware('auth')->group(function () {
         Route::resource('products', ProductController::class)->names([
             'index' => 'products.index',
