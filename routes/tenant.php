@@ -12,20 +12,20 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
-    // 1. Publik Storefront (Untuk Buyer)
+    // PUBLIC: Tampilan Katalog Pembeli (Buyer)
     Route::get('/', function () {
         return Inertia::render('Shop/Catalog', [
             'products' => Product::all(),
             'tenantId' => tenant('id'),
-            'auth' => ['user' => auth()->user()] // Akun Buyer dari DB Tenant
+            'auth' => ['user' => auth()->user()]
         ]);
     })->name('tenant.catalog');
 
-    // 2. Admin Area (Untuk Seller mengelola toko ini)
+    // PRIVATE: Dashboard Management (Seller)
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () { return redirect()->route('products.index'); })->name('dashboard');
         Route::resource('products', ProductController::class);
     });
 
-    require __DIR__.'/auth.php'; // Auth di sini akan mengakses DB Tenant (untuk Buyer)
+    require __DIR__.'/auth.php';
 });
