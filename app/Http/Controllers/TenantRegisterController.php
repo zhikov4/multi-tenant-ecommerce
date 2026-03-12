@@ -1,36 +1,34 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
-class TenantRegisterController extends Controller
-{
-    public function show()
-    {
-        return Inertia::render('Welcome');
+class TenantRegisterController extends Controller {
+    public function index() {
+        return Inertia::render('Welcome', [
+            'tenants' => Tenant::with('domains')->get(),
+            'user' => Auth::user()
+        ]);
     }
-
-    public function store(Request $request)
-    {
-        $request->validate([
+    public function store(Request $request) {
+        $validated = $request->validate([
             'store_name' => 'required|alpha_dash|unique:tenants,id',
-        ], [
-            'store_name.unique' => 'Nama toko ini sudah digunakan, silahkan coba nama lain.',
         ]);
 
-        $tenantId = strtolower($request->store_name);
+        $tenantId = strtolower($validated['store_name']);
         
-        $tenant = Tenant::create(['id' => $tenantId]);
-        
+        // Simpan toko dengan user_id pemiliknya
+        $tenant = Tenant::create([
+            'id' => $tenantId,
+            'user_id' => Auth::id() 
+        ]);
+
         $tenant->domains()->create([
             'domain' => $tenantId . '.localhost',
         ]);
 
-        $targetUrl = "http://{$tenantId}.localhost:8000/register";
-
-        return Inertia::location($targetUrl);
+        return redirect()->route('central.home');
     }
 }

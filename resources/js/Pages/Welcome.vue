@@ -1,66 +1,38 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
-
-const form = useForm({
-    store_name: '',
-});
-
-const submit = () => {
-    form.post('/onboarding');
-};
+import { Link, Head } from '@inertiajs/vue3';
+defineProps({ tenants: Array, user: Object });
 </script>
-
 <template>
-    <Head title="MyStoreTest SaaS - Build Your Empire" />
-    
-    <div class="min-h-screen bg-[#FBFBFD] flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8 text-center">
-            
-            <div class="mb-12">
-                <h1 class="text-5xl font-extrabold tracking-tight text-gray-900 mb-4">
-                    Launch Your Store.
-                </h1>
-                <p class="text-lg text-gray-500">
-                    Sistem multi-tenant otomatis. Satu klik, database independen Anda siap beroperasi.
-                </p>
+    <Head title="Platform eCommerce" />
+    <div class="min-h-screen bg-gray-50">
+        <nav class="bg-white p-6 shadow-sm flex justify-between items-center">
+            <h1 class="text-2xl font-black text-indigo-600">MyStorePlatform.</h1>
+            <div v-if="user" class="flex items-center gap-4">
+                <span class="text-sm font-bold text-gray-700">Hello, {{ user.name }}</span>
+                <Link :href="route('logout')" method="post" as="button" class="text-red-500 text-sm">Logout</Link>
             </div>
+            <div v-else class="space-x-4">
+                <Link :href="route('login')" class="text-sm font-bold">Login Seller</Link>
+            </div>
+        </nav>
 
-            <div class="bg-white py-10 px-8 shadow-2xl shadow-gray-200/50 rounded-3xl border border-gray-100 text-left">
-                <form @submit.prevent="submit" class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-900 mb-2">
-                            Store Name
-                        </label>
-                        <div class="relative flex items-center">
-                            <input 
-                                v-model="form.store_name" 
-                                type="text" 
-                                class="w-full pl-4 pr-24 py-4 border-gray-200 rounded-2xl focus:ring-black focus:border-black font-medium transition-colors" 
-                                placeholder="my-awesome-store"
-                                required
-                            >
-                            <span class="absolute right-4 text-gray-400 font-medium bg-white pl-2">
-                                .localhost
-                            </span>
-                        </div>
-                        <p v-if="form.errors.store_name" class="mt-2 text-sm text-red-600 font-medium">
-                            {{ form.errors.store_name }}
-                        </p>
-                    </div>
-
-                    <button 
-                        type="submit" 
-                        :disabled="form.processing"
-                        class="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-sm text-lg font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 transition-all"
-                    >
-                        {{ form.processing ? 'Creating Database...' : 'Create My Store' }}
-                    </button>
+        <div class="max-w-7xl mx-auto py-12 px-6">
+            <div v-if="user" class="mb-12 bg-indigo-600 p-8 rounded-2xl text-white">
+                <h2 class="text-2xl font-bold mb-4">Launch a New Store</h2>
+                <form @submit.prevent="$inertia.post(route('central.tenant.store'), { store_name: newStore })" class="flex gap-4">
+                    <input v-model="newStore" placeholder="Enter store name..." class="flex-1 p-3 rounded-lg text-black">
+                    <button class="bg-white text-indigo-600 px-6 py-3 rounded-lg font-black">Create Store</button>
                 </form>
             </div>
 
-            <p class="text-xs text-gray-400 font-medium tracking-widest uppercase mt-8">
-                Powered by Laravel Tenancy
-            </p>
+            <h2 class="text-3xl font-black mb-8">Discover Stores</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div v-for="t in tenants" :key="t.id" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-xl font-bold text-gray-900 uppercase">{{ t.id }}</h3>
+                    <p class="text-gray-500 text-sm mb-4">Visit this store to see amazing products.</p>
+                    <a :href="'http://' + t.domains[0].domain + ':8000'" class="inline-block bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold">Visit Store →</a>
+                </div>
+            </div>
         </div>
     </div>
 </template>
