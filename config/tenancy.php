@@ -3,10 +3,7 @@ declare(strict_types=1);
 return [
     'tenant_model' => \App\Models\Tenant::class,
     'id_generator' => \Stancl\Tenancy\UUIDGenerator::class,
-    'central_domains' => [
-        'localhost',
-        '127.0.0.1',
-    ],
+    'central_domains' => ['localhost', '127.0.0.1'],
     'bootstrappers' => [
         \Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper::class,
         \Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
