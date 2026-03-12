@@ -1,45 +1,40 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
-
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { useForm, Link } from "@inertiajs/vue3";
 defineProps({ products: Array });
-
-const form = useForm({ product_id: null, quantity: 1 });
-
-const addToCart = (id) => {
-    form.product_id = id;
-    form.post(route('cart.store'), { preserveScroll: true });
-};
+const form = useForm({ name: "", price: "", stock: 0 });
+const submit = () => form.post(route("products.store"), { onSuccess: () => form.reset() });
 </script>
-
 <template>
-    <Head title="Premium Collection" />
     <AuthenticatedLayout>
-        <div class="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-            <header class="mb-12">
-                <h1 class="text-4xl font-extrabold text-black tracking-tight">Our Collection</h1>
-                <p class="mt-2 text-gray-500">Experience the future of technology today.</p>
-            </header>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div v-for="product in products" :key="product.id" 
-                    class="group relative bg-white border border-gray-100 rounded-3xl p-8 hover:shadow-2xl hover:shadow-gray-200 transition-all duration-500">
-                    <div class="mb-6 h-48 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                        <span class="text-gray-300 font-bold italic">Image Preview</span>
-                    </div>
-                    
-                    <h2 class="text-xl font-bold text-black mb-1">{{ product.name }}</h2>
-                    <p class="text-sm text-gray-400 mb-6 line-clamp-2">{{ product.description }}</p>
-                    
-                    <div class="flex items-center justify-between mt-auto">
-                        <span class="text-2xl font-black text-black">${{ product.price }}</span>
-                        <button @click="addToCart(product.id)" 
-                            class="bg-black text-white px-6 py-3 rounded-2xl text-sm font-bold hover:bg-indigo-600 transition-colors">
-                            Add to Bag
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="p-6">
+            <h1 class="text-2xl font-bold mb-4 text-black">MyStoreTest - Products</h1>
+            <form @submit.prevent="submit" class="mb-8 space-y-2">
+                <input v-model="form.name" placeholder="Name" class="border p-2 rounded w-full text-black">
+                <input v-model="form.price" type="number" placeholder="Price" class="border p-2 rounded w-full text-black">
+                <input v-model="form.stock" type="number" placeholder="Stock" class="border p-2 rounded w-full text-black">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Add Product</button>
+            </form>
+            <table class="w-full border-collapse border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-100 text-black">
+                        <th class="border p-2">Name</th>
+                        <th class="border p-2">Price</th>
+                        <th class="border p-2">Stock</th>
+                        <th class="border p-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-black">
+                    <tr v-v-for="p in products" :key="p.id">
+                        <td class="border p-2">{{ p.name }}</td>
+                        <td class="border p-2">{{ p.price }}</td>
+                        <td class="border p-2">{{ p.stock }}</td>
+                        <td class="border p-2">
+                            <Link :href="route('products.destroy', p.id)" method="delete" as="button" class="text-red-600">Delete</Link>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </AuthenticatedLayout>
 </template>
