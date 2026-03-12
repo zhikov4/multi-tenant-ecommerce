@@ -12,7 +12,7 @@ const showingNavigationDropdown = ref(false);
                 <div class="flex justify-between h-16">
                     <div class="flex items-center space-x-8">
                         <Link :href="route('products.index')" class="text-xl font-bold tracking-tight text-black">
-                            iStore<span class="text-indigo-600">.</span>
+                            MyStoreTest<span class="text-indigo-600">.</span>
                         </Link>
                         <div class="hidden space-x-6 sm:flex">
                             <Link :href="route('products.index')" :class="route().current('products.*') ? 'text-black' : 'text-gray-400'" class="text-sm font-medium hover:text-black transition-colors">Shop</Link>

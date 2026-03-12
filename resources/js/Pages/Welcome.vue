@@ -11,7 +11,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="iStore SaaS - Build Your Empire" />
+    <Head title="MyStoreTest SaaS - Build Your Empire" />
     
     <div class="min-h-screen bg-[#FBFBFD] flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8 text-center">

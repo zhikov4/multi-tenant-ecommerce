@@ -6,16 +6,16 @@ use Tests\TestCase;
 use App\Models\Tenant;
 use App\Models\Product;
 
-class TenantIsolationTest extends TestCase
+class MyStoreTest extends TestCase
 {
     public function test_tenant_databases_are_strictly_isolated(): void
     {
         // Setup tenants
         $tenant1 = Tenant::create(['id' => 'test_store_1']);
-        $tenant1->domains()->create(['domain' => 'test1.localhost']);
+        $tenant1->domains()->create(['domain' => 'test1.localhost');
 
-        $tenant2 = Tenant::create(['id' => 'test_store_2']);
-        $tenant2->domains()->create(['domain' => 'test2.localhost']);
+        $tenant2 = Tenant::create(['id' => 'test_store_2'']);
+        $tenant2->domains()->create(['domain' => 'test2.localhost');
 
         // Insert into tenant 1
         tenancy()->initialize($tenant1);
