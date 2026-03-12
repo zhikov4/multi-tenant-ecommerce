@@ -21,15 +21,16 @@ class TenantRegisterController extends Controller
             'store_name.unique' => 'Nama toko ini sudah digunakan, silahkan coba nama lain.',
         ]);
 
-        // FIX: Mengubah strtotower menjadi strtolower
-        $tenantId = strtotower($request->store_name);
+        $tenantId = strtolower($request->store_name);
         
         $tenant = Tenant::create(['id' => $tenantId]);
+        
         $tenant->domains()->create([
             'domain' => $tenantId . '.localhost',
         ]);
 
         $targetUrl = "http://{$tenantId}.localhost:8000/register";
+
         return Inertia::location($targetUrl);
     }
 }
