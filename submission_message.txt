@@ -1,0 +1,21 @@
+Subject: Task Submission - Full Stack Developer (Multi-Tenant eCommerce)
+
+Dear Eng Mohab Mamdouh,
+
+Thank you for the opportunity to work on this exciting task. 
+
+I have completed the multi-tenant eCommerce platform using Laravel and Vue.js. The application successfully implements strict data isolation using a multi-database architecture. 
+
+Key deliverables completed:
+- Automatic tenant onboarding with dynamic database creation.
+- Tenant-specific user authentication and authorization.
+- Product management (CRUD) and Shopping Cart functionality within the isolated environment.
+- Automated feature tests validating strict data isolation across multiple tenant databases.
+
+The complete and documented codebase has been uploaded to the public GitHub repository here:
+https://github.com/zhikov4/multi-tenant-ecommerce
+
+Thank you for your time and review. I look forward to your feedback.
+
+Best regards,
+[Nama Anda]

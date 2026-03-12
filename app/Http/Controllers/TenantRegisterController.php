@@ -18,15 +18,20 @@ class TenantRegisterController extends Controller
         $request->validate([
             'store_name' => 'required|alpha_dash|unique:tenants,id',
         ], [
-            'store_name.unique' => 'Nama toko ini sudah digunakan, silahkan coba nama lain.',
+            'stock' => 'Nama toko ini sudah digunakan, silahkan coba nama lain.',
         ]);
 
         $tenantId = strtolower($request->store_name);
         $tenant = Tenant::create(['id' => $tenantId]);
+
+        // Mengambil central domain dengan fallback ke localhost
+        $centralDomains = config('tenancy.central_domains', ['localhost']);
+        $domain = $tenantId . '.' . ($centralDomains[0] ?? 'localhost');
+
         $tenant->domains()->create([
-            'domain' => $tenantId . '.' . config('tenansy.central_domains')[0],
+            'domain' => $domain,
         ]);
 
-        return redirect()->away('http://' . $tenantId . '.localhost:8000/register');
+        return redirect()->away('http://' . $domain . ':8000/register');
     }
 }
