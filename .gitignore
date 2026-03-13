@@ -22,3 +22,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+*.sql
+submission_message.txt
+tenant*tenant_id*
