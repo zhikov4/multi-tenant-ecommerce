@@ -6,13 +6,6 @@ use App\Http\Controllers\TenantRegisterController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-/*
-|--------------------------------------------------------------------------
-| Central Web Routes
-|--------------------------------------------------------------------------
-*/
-
-// PAKSA rute utama muncul di localhost
 Route::group(['domain' => 'localhost'], function () {
     Route::get('/', function () {
         return Inertia::render('Welcome', [
@@ -20,24 +13,24 @@ Route::group(['domain' => 'localhost'], function () {
             'canRegister' => Route::has('register'),
         ]);
     })->name('central.home');
+
+    require __DIR__.'/auth.php';
+
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Rute baru buat Cart & Settings biar menunya idup!
+        Route::get('/cart', function () { return Inertia::render('Cart'); })->name('cart');
+        Route::get('/settings', function () { return Inertia::render('Settings'); })->name('settings');
+        
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+        Route::post('/create-store', [TenantRegisterController::class, 'store'])->name('central.store.create');
+    });
 });
 
-// Fallback untuk IP atau domain central lainnya
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    return redirect()->route('central.home');
 });
-
-require __DIR__.'/auth.php';
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::post('/create-store', [TenantRegisterController::class, 'store'])->name('central.store.create');
-});
-
-// Emergency Asset Bypass
-Route::get('/tenancy-assets/{path?}', function () { return response(''); })->name('stancl.tenancy.asset');

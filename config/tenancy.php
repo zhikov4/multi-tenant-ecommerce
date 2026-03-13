@@ -6,10 +6,11 @@ return [
     'tenant_model' => \App\Models\Tenant::class,
     'id_generator' => \Stancl\Tenancy\UUIDGenerator::class,
 
-    // KUNCI: Daftarkan semua IP/Host pusat di sini
+    // JURUS ANTI-404: Daftarkan semua host pusat di sini
     'central_domains' => [
         '127.0.0.1',
         'localhost',
+        'localhost:8000',
     ],
 
     'database' => [
@@ -22,7 +23,7 @@ return [
         ],
     ],
 
-    'routes' => false, // Kita handle rute secara manual agar tidak bentrok
+    'routes' => false, // Kita handle rute manual di web.php dan tenant.php
     'assets' => ['asset_helper' => false, 'central_host' => 'localhost'],
     'storage' => ['suffix_base' => 'tenant', 'disks' => ['local', 'public']],
     'resource_splitting' => ['migrations' => ['tenant_path' => database_path('migrations/tenant')]],

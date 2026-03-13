@@ -7,37 +7,28 @@ use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
-    /**
-     * The root template that is loaded on the first page visit.
-     *
-     * @var string
-     */
     protected $rootView = 'app';
 
-    /**
-     * Determine the current asset version.
-     */
     public function version(Request $request): ?string
     {
         return parent::version($request);
     }
 
-    /**
-     * Define the props that are shared by default.
-     *
-     * @return array<string, mixed>
-     */
     public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
+        return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $request->user(),
             ],
-            // Tambahkan ini biar Vue tau ID tenant-nya
-            'tenant_id' => function () {
-                return function_exists('tenant') ? tenant('id') : null;
-            },
-        ];
+            // Share flash message buat notifikasi buat toko berhasil
+            'flash' => [
+                'message' => fn () => $request->session()->get('message'),
+            ],
+            // Share status toko ke semua komponen Vue
+            'status' => fn () => $request->session()->get('status') ?? [
+                'hasStore' => false,
+                'storeUrl' => null,
+            ],
+        ]);
     }
 }
