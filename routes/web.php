@@ -8,37 +8,36 @@ use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes (Central Domain)
+| Central Web Routes
 |--------------------------------------------------------------------------
 */
 
-// 1. Discovery Page (Bisa dibuka siapa saja)
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-    ]);
-})->name('central.home');
+// PAKSA rute utama muncul di localhost
+Route::group(['domain' => 'localhost'], function () {
+    Route::get('/', function () {
+        return Inertia::render('Welcome', [
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register'),
+        ]);
+    })->name('central.home');
+});
 
-// 2. Rute Autentikasi (Breeze)
+// Fallback untuk IP atau domain central lainnya
+Route::get('/', function () {
+    return Inertia::render('Welcome');
+});
+
 require __DIR__.'/auth.php';
 
-// 3. Rute Khusus User yang sudah Login
 Route::middleware(['auth', 'verified'])->group(function () {
-    
-    // Dashboard dengan logika pengecekan toko
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Profile & Settings
+    
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Proses pembuatan toko baru
     Route::post('/create-store', [TenantRegisterController::class, 'store'])->name('central.store.create');
 });
 
-// Bypass Asset Tenancy (Tetap simpan agar aset aman)
-Route::get('/tenancy-assets/{path?}', function () {
-    return response('');
-})->name('stancl.tenancy.asset');
+// Emergency Asset Bypass
+Route::get('/tenancy-assets/{path?}', function () { return response(''); })->name('stancl.tenancy.asset');

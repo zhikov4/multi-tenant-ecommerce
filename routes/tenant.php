@@ -12,9 +12,6 @@ Route::middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
-
+    // Rute toko (tenant)
     Route::get('/', [ProductController::class, 'index'])->name('tenant.products.index');
-    Route::post('/products', [ProductController::class, 'store'])->name('tenant.products.store');
-    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('tenant.products.destroy');
-
 });
