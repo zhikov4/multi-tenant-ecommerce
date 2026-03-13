@@ -34,6 +34,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            // Tambahkan ini biar Vue tau ID tenant-nya
+            'tenant_id' => function () {
+                return function_exists('tenant') ? tenant('id') : null;
+            },
         ];
     }
 }

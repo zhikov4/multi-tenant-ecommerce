@@ -6,14 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->decimal('price', 15, 2);
-            $table->integer('stock')->default(0);
-            $table->timestamps();
+        Schema::create('products', function (Blueprint $blueprint) {
+            $blueprint->id();
+            $blueprint->string('name');
+            $blueprint->string('slug')->unique();
+            $blueprint->decimal('price', 15, 2);
+            $blueprint->text('description')->nullable();
+            $blueprint->timestamps();
         });
     }
-    public function down(): void { Schema::dropIfExists('products'); }
+
+    public function down(): void {
+        Schema::dropIfExists('products');
+    }
 };

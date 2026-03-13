@@ -2,24 +2,22 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Config;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        Vite::prefetch(concurrency: 3);
+        // Jika kita sedang di subdomain (tenant), paksa aset ke path absolut
+        if (request()->getHost() !== 'localhost' && request()->getHost() !== '127.0.0.1') {
+            Config::set('app.asset_url', asset('/'));
+        }
     }
 }
