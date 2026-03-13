@@ -5,36 +5,54 @@ namespace App\Http\Controllers;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class TenantRegisterController extends Controller
 {
     public function store(Request $request)
     {
-        // Validation: Pastikan subdomain belum dipakai siapa pun
+        // Ubah nama toko jadi slug dulu sebelum di-cek ke database
+        $slug = Str::slug($request->store_name);
+        $request->merge(['domain_id' => $slug]);
+
+        // Validasi ketat untuk semua step
         $request->validate([
-            'store_name' => [
-                'required', 
-                'string', 
-                'max:30', 
-                'alpha_dash',
-                Rule::unique('tenants', 'id')
-            ],
+            'store_display_name' => 'required|string|max:255',
+            'domain_id'          => 'required|string|max:255|unique:tenants,id', // Cek apakah slug sudah dipakai
+            'domain_extension'   => 'required',
+            'description'        => 'required|string',
+            'category'           => 'required',
+            'country_code'       => 'required',
+            'phone'              => 'required|string',
+            'address_detail'     => 'required|string',
+            'zip_code'           => 'required|string',
+            'agreement'          => 'accepted',
+        ], [
+            // Custom error message (Professional English)
+            'domain_id.unique' => 'This Domain Slug is already assigned to an active node. Please select a unique identifier.',
         ]);
 
-        $domainName = Str::slug($request->store_name);
+        try {
+            $tenant = Tenant::create([
+                'id'      => $slug,
+                'user_id' => auth()->id(),
+                'data'    => [
+                    'store_name'     => $request->store_display_name,
+                    'category'       => $request->category,
+                    'description'    => $request->description,
+                    'phone'          => $request->country_code . $request->phone,
+                    'address_detail' => $request->address_detail,
+                    'zip_code'       => $request->zip_code,
+                ]
+            ]);
 
-        // CREATE TENANT: Stancl/Tenancy otomatis handle pembuatan DB tenant_domainName
-        $tenant = Tenant::create([
-            'id' => $domainName,
-            'user_id' => auth()->id(), // Relasi Owner ke Central User
-        ]);
+            $tenant->domains()->create([
+                'domain' => $slug . $request->domain_extension,
+            ]);
 
-        // CREATE DOMAIN
-        $tenant->domains()->create([
-            'domain' => $domainName . '.localhost',
-        ]);
+            return redirect()->route('dashboard');
 
-        return redirect()->back()->with('message', 'Toko Lu Berhasil Dibuat!');
+        } catch (\Exception $e) {
+            return redirect()->route('dashboard');
+        }
     }
 }

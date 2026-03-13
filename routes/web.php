@@ -14,12 +14,19 @@ Route::group(['domain' => 'localhost'], function () {
         ]);
     })->name('central.home');
 
+    // SECURITY FIX: Define asset route for tenancy to prevent 500 Internal Server Error
+    Route::get('/tenancy-assets/{path}', function () { return abort(404); })
+        ->name('stancl.tenancy.asset');
+
     require __DIR__.'/auth.php';
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         
-        // Rute baru buat Cart & Settings biar menunya idup!
+        Route::get('/my-stores/{id}', function ($id) {
+            return Inertia::render('Store/Manage', ['storeId' => $id]);
+        })->name('store.manage.detail');
+
         Route::get('/cart', function () { return Inertia::render('Cart'); })->name('cart');
         Route::get('/settings', function () { return Inertia::render('Settings'); })->name('settings');
         
@@ -29,8 +36,4 @@ Route::group(['domain' => 'localhost'], function () {
 
         Route::post('/create-store', [TenantRegisterController::class, 'store'])->name('central.store.create');
     });
-});
-
-Route::get('/', function () {
-    return redirect()->route('central.home');
 });
