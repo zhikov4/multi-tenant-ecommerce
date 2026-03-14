@@ -4,28 +4,32 @@ import { inject } from 'vue';
 
 const route = inject('route');
 
-const form = useForm({
-    name: '',
-    description: '',
-    price: '',
-    stock: '',
-    category: '',
-    sku: '',
-    is_active: true,
+const props = defineProps({
+    product: Object,
 });
 
-const submit = () => form.post(route('products.store'));
+const form = useForm({
+    name: props.product.name,
+    description: props.product.description ?? '',
+    price: props.product.price,
+    stock: props.product.stock,
+    category: props.product.category ?? '',
+    sku: props.product.sku ?? '',
+    is_active: props.product.is_active,
+});
+
+const submit = () => form.put(route('products.update', props.product.id));
 </script>
 
 <template>
-    <Head title="Add Product" />
+    <Head title="Edit Product" />
     <div class="min-h-screen bg-slate-50 p-8 font-sans">
         <div class="max-w-2xl mx-auto">
             <div class="flex items-center gap-4 mb-8">
                 <Link :href="route('products.index')" class="text-slate-400 hover:text-slate-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </Link>
-                <h1 class="text-3xl font-black text-slate-900">Add Product</h1>
+                <h1 class="text-3xl font-black text-slate-900">Edit Product</h1>
             </div>
 
             <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
@@ -74,7 +78,7 @@ const submit = () => form.post(route('products.store'));
                     <div class="flex gap-3 pt-2">
                         <button @click="submit" :disabled="form.processing"
                             class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-black hover:bg-blue-700 transition-all disabled:opacity-50">
-                            {{ form.processing ? 'Saving...' : 'Save Product' }}
+                            {{ form.processing ? 'Updating...' : 'Update Product' }}
                         </button>
                         <Link :href="route('products.index')" class="flex-1 text-center bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">
                             Cancel

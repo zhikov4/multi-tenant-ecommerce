@@ -12,9 +12,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->decimal('price', 10, 2)->default(0);
             $table->integer('stock')->default(0);
-            $table->decimal('price', 15, 2)->default(0);
-            $table->string('status')->default('active');
+            $table->string('category')->nullable();
+            $table->string('sku')->nullable()->unique();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

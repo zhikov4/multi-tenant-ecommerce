@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
@@ -10,68 +11,46 @@ use Stancl\Tenancy\Middleware;
 
 class TenancyServiceProvider extends ServiceProvider
 {
-    public function events()
+    public function register(): void
     {
-        return [
-            Events\CreatingTenant::class => [],
-            Events\TenantCreated::class => [
-                Jobs\CreateDatabase::class,
-                Jobs\MigrateDatabase::class,
-            ],
-            Events\SavingTenant::class => [],
-            Events\TenantSaved::class => [],
-            Events\UpdatingTenant::class => [],
-            Events\TenantUpdated::class => [],
-            Events\DeletingTenant::class => [],
-            Events\TenantDeleted::class => [
-                Jobs\DeleteDatabase::class,
-            ],
-            Events\InitializingTenancy::class => [],
-            Events\TenancyInitialized::class => [
-                Listeners\BootstrapTenancy::class,
-            ],
-            Events\EndingTenancy::class => [],
-            Events\TenancyEnded::class => [
-                Listeners\RevertToCentralContext::class,
-            ],
-            Events\BootstrappingTenancy::class => [],
-            Events\TenancyBootstrapped::class => [],
-            Events\RevertingToCentralContext::class => [],
-            Events\RevertedToCentralContext::class => [],
-            Events\MigratingDatabase::class => [],
-            Events\DatabaseMigrated::class => [],
-            Events\SeedingDatabase::class => [],
-            Events\DatabaseSeeded::class => [],
-            Events\CreatingDatabase::class => [],
-            Events\DatabaseCreated::class => [],
-            Events\DeletingDatabase::class => [],
-            Events\DatabaseDeleted::class => [],
-        ];
+        $this->app->bind(
+            \Stancl\Tenancy\Contracts\TenantWithDatabase::class,
+            \App\Models\Tenant::class
+        );
     }
 
-    public function register()
-    {
-    }
-
-    public function boot()
+    public function boot(): void
     {
         $this->bootEvents();
         $this->makeTenancyMiddlewareHighestPriority();
     }
 
-    protected function bootEvents()
+    protected function bootEvents(): void
     {
-        foreach ($this->events() as $event => $listeners) {
+        $events = [
+            Events\TenantCreated::class => [
+                Jobs\CreateDatabase::class,
+                Jobs\MigrateDatabase::class,
+            ],
+            Events\TenantDeleted::class => [
+                Jobs\DeleteDatabase::class,
+            ],
+            Events\TenancyInitialized::class => [
+                Listeners\BootstrapTenancy::class,
+            ],
+            Events\TenancyEnded::class => [
+                Listeners\RevertToCentralContext::class,
+            ],
+        ];
+
+        foreach ($events as $event => $listeners) {
             foreach ($listeners as $listener) {
-                if ($listener instanceof Jobs\QueuedTenantAwareJob) {
-                    $listener = $listener::class;
-                }
-                \Illuminate\Support\Facades\Event::listen($event, $listener);
+                Event::listen($event, $listener);
             }
         }
     }
 
-    protected function makeTenancyMiddlewareHighestPriority()
+    protected function makeTenancyMiddlewareHighestPriority(): void
     {
         $tenancyMiddleware = [
             Middleware\InitializeTenancyByDomain::class,

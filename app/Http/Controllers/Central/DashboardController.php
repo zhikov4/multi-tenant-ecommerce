@@ -3,14 +3,18 @@
 namespace App\Http\Controllers\Central;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cart;
 use App\Models\Tenant;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $userTenant = Tenant::where('user_id', auth()->id())->first();
+        $user = Auth::user();
+
+        $userTenant = Tenant::where('user_id', $user->id)->first();
         $storeUrl = null;
         $storeName = null;
         $storeDisplay = null;
@@ -18,11 +22,16 @@ class DashboardController extends Controller
         if ($userTenant) {
             $domain = $userTenant->domains()->first();
             if ($domain) {
-                $storeUrl = 'http://' . $domain->domain . ':8000/products';
-                $storeName = $userTenant->id;
+                $storeUrl     = 'http://' . $domain->domain . ':8000/products';
+                $storeName    = $userTenant->id;
                 $storeDisplay = $domain->domain;
             }
         }
+
+        $cartItems = Cart::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
 
         return Inertia::render('Dashboard', [
             'status' => [
@@ -31,10 +40,7 @@ class DashboardController extends Controller
                 'storeName'    => $storeName,
                 'storeDisplay' => $storeDisplay,
             ],
-            'auth' => [
-                'user' => auth()->user(),
-            ],
-            'discoveryProducts' => [],
+            'cartItems' => $cartItems,
         ]);
     }
 }

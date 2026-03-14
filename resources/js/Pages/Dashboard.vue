@@ -1,20 +1,26 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, inject } from 'vue';
 
+const route = inject('route');
 const { props } = usePage();
+
+const appProps = defineProps({
+    status:    { type: Object, default: () => ({}) },
+    cartItems: { type: Array,  default: () => [] },
+});
 
 const myStores = ref([]);
 
 const syncStores = () => {
     let stores = JSON.parse(localStorage.getItem('enterprise_nodes') || '[]');
-    if (stores.length === 0 && props.status?.hasStore) {
+    if (stores.length === 0 && appProps.status?.hasStore) {
         stores.push({
-            id: props.status.storeName || 'active-1',
-            name: props.status.storeDisplay || props.status.storeName,
-            url: props.status.storeUrl,
-            lastActivity: 'Active Now'
+            id:           appProps.status.storeName || 'active-1',
+            name:         appProps.status.storeDisplay || appProps.status.storeName,
+            url:          appProps.status.storeUrl,
+            lastActivity: 'Active Now',
         });
         localStorage.setItem('enterprise_nodes', JSON.stringify(stores));
     }
@@ -27,7 +33,7 @@ onMounted(() => {
 });
 
 const revokeStore = (storeId) => {
-    if (confirm('Are you sure you want to remove this store?')) {
+    if (confirm('Remove this store from your dashboard?')) {
         let stores = JSON.parse(localStorage.getItem('enterprise_nodes') || '[]');
         stores = stores.filter(s => s.id !== storeId);
         localStorage.setItem('enterprise_nodes', JSON.stringify(stores));
@@ -40,22 +46,22 @@ const isModalOpen = ref(false);
 const currentStep = ref(1);
 const extensions = ['.mystore.id', '.mystore.co', '.aweso.me', '.shop.me'];
 const countries = [
-    { code: '+1', name: 'US' },
+    { code: '+1',  name: 'US' },
     { code: '+62', name: 'ID' },
-    { code: '+44', name: 'UK' }
+    { code: '+44', name: 'UK' },
 ];
 
 const form = useForm({
     store_display_name: '',
-    store_name: '',
-    domain_extension: '.mystore.id',
-    description: '',
-    category: 'Fashion & Apparel',
-    country_code: '+1',
-    phone: '',
-    address_detail: '',
-    zip_code: '',
-    agreement: false
+    store_name:         '',
+    domain_extension:   '.mystore.id',
+    description:        '',
+    category:           'Fashion & Apparel',
+    country_code:       '+1',
+    phone:              '',
+    address_detail:     '',
+    zip_code:           '',
+    agreement:          false,
 });
 
 const validateAndNext = () => {
@@ -77,10 +83,10 @@ const createStore = () => {
             const newStatus = page.props.status;
             const stores = JSON.parse(localStorage.getItem('enterprise_nodes') || '[]');
             stores.push({
-                id: form.store_name,
-                name: form.store_display_name,
-                url: newStatus?.storeUrl || `http://${form.store_name}.localhost:8000/products`,
-                lastActivity: 'Just Deployed'
+                id:           form.store_name,
+                name:         form.store_display_name,
+                url:          newStatus?.storeUrl || `http://${form.store_name}.localhost:8000/products`,
+                lastActivity: 'Just Deployed',
             });
             localStorage.setItem('enterprise_nodes', JSON.stringify(stores));
             window.dispatchEvent(new Event('nodes-updated'));
@@ -88,28 +94,11 @@ const createStore = () => {
             form.reset();
             currentStep.value = 1;
         },
-        preserveScroll: true
+        preserveScroll: true,
     });
 };
 
 const formatUSD = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
-
-const dummyCart = [
-    { id: 1, name: 'Mechanical Keyboard K3 Edition Ultra', price: 89.99, qty: 1 },
-    { id: 2, name: 'Arabica Coffee Beans 500g Premium', price: 12.50, qty: 2 },
-];
-
-const dummyHistory = [
-    { id: '#INV-001', date: '12 Mar 2026', total: 45.00, status: 'Success' },
-    { id: '#INV-002', date: '13 Mar 2026', total: 89.99, status: 'Pending' },
-];
-
-const suggested = [
-    { id: 101, name: 'Minimalist Chair', price: 120.00 },
-    { id: 102, name: 'Bluetooth Earbuds', price: 45.50 },
-    { id: 103, name: 'Leather Notebook', price: 15.00 },
-    { id: 104, name: 'Desk Lamp Pro', price: 29.99 },
-];
 </script>
 
 <template>
@@ -127,10 +116,11 @@ const suggested = [
                 </button>
             </header>
 
+            <!-- My Stores -->
             <section class="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -mr-20 -mt-20 opacity-40"></div>
                 <h2 class="text-xl font-black text-slate-800 flex items-center gap-3 mb-8 pb-4 border-b border-slate-50 relative z-10">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     Recent Shop Activity
                 </h2>
                 <div v-if="myStores.length > 0" class="space-y-4 relative z-10">
@@ -146,11 +136,11 @@ const suggested = [
                         </div>
                         <div class="flex items-center gap-3 w-full md:w-auto flex-shrink-0">
                             <button @click="revokeStore(store.id)" class="bg-red-50 text-red-500 p-3.5 rounded-2xl hover:bg-red-500 hover:text-white transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                             <a :href="store.url || `http://${store.id}.localhost:8000/products`" class="flex-1 md:flex-none bg-slate-900 text-white px-8 py-3.5 rounded-2xl font-black text-sm hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
                                 Open Console
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                             </a>
                         </div>
                     </div>
@@ -161,67 +151,67 @@ const suggested = [
             </section>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- Shopping Cart -->
                 <section class="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col">
                     <h2 class="text-xl font-black text-slate-800 flex items-center gap-3 mb-8">
-                        <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                         Shopping Cart
                     </h2>
-                    <div class="space-y-4 flex-1">
-                        <div v-for="item in dummyCart" :key="item.id" class="flex items-center gap-4 p-4 bg-slate-50 rounded-[1.5rem] border border-slate-100">
-                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center border border-slate-200 shadow-sm">
-                                <svg class="w-7 h-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    <div v-if="cartItems.length > 0" class="space-y-4 flex-1">
+                        <div v-for="item in cartItems" :key="item.id" class="flex items-center gap-4 p-4 bg-slate-50 rounded-[1.5rem] border border-slate-100">
+                            <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center border border-slate-200 shadow-sm flex-shrink-0">
+                                <svg class="w-7 h-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                             </div>
                             <div class="min-w-0 flex-1">
-                                <h4 class="font-bold text-slate-800 text-sm truncate uppercase">{{ item.name }}</h4>
-                                <p class="text-blue-600 font-black text-xs mt-1">{{ formatUSD(item.price) }} <span class="text-slate-400 ml-1 font-bold">x{{ item.qty }}</span></p>
+                                <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest">{{ item.product_store }}</p>
+                                <h4 class="font-bold text-slate-800 text-sm truncate uppercase">{{ item.product_name }}</h4>
+                                <p class="text-blue-600 font-black text-xs mt-1">
+                                    {{ formatUSD(item.product_price) }}
+                                    <span class="text-slate-400 ml-1 font-bold">x{{ item.quantity }}</span>
+                                </p>
                             </div>
                         </div>
+                    </div>
+                    <div v-else class="flex-1 flex items-center justify-center py-8">
+                        <p class="text-slate-400 text-sm font-bold italic">Your cart is empty.</p>
                     </div>
                     <Link :href="route('cart')" class="w-full py-4 mt-8 text-xs font-black uppercase text-blue-600 bg-blue-50/50 border-2 border-blue-100 rounded-2xl hover:bg-blue-600 hover:text-white transition-all text-center block tracking-widest">
                         View Cart Details
                     </Link>
                 </section>
 
+                <!-- Recent History -->
                 <section class="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col">
                     <h2 class="text-xl font-black text-slate-800 flex items-center gap-3 mb-8">
-                        <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         Recent History
                     </h2>
-                    <div class="space-y-4 flex-1">
-                        <div v-for="trx in dummyHistory" :key="trx.id" class="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 transition-all hover:bg-white">
-                            <div>
-                                <h4 class="font-black text-slate-800 text-sm uppercase">{{ trx.id }}</h4>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{{ trx.date }}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-black text-slate-900 text-sm">{{ formatUSD(trx.total) }}</p>
-                                <span class="text-green-500 bg-green-50 border border-green-100 px-2 py-0.5 rounded text-[10px] font-black uppercase mt-1 inline-block">{{ trx.status }}</span>
-                            </div>
-                        </div>
+                    <div class="flex-1 flex items-center justify-center py-8">
+                        <p class="text-slate-400 text-sm font-bold italic">No transactions yet.</p>
                     </div>
-                    <button class="w-full py-4 mt-8 text-xs font-black uppercase text-slate-400 bg-slate-50/50 border-2 border-slate-100 rounded-2xl hover:bg-slate-900 hover:text-white transition-all block tracking-widest">
+                    <button disabled class="w-full py-4 mt-8 text-xs font-black uppercase text-slate-300 bg-slate-50 border-2 border-slate-100 rounded-2xl tracking-widest cursor-not-allowed">
                         Transaction Ledger
                     </button>
                 </section>
             </div>
 
-            <section class="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden">
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-xl font-black text-slate-800">Suggested For You</h2>
-                    <Link :href="route('central.home')" class="text-xs font-black text-blue-600 uppercase tracking-widest hover:underline decoration-2 underline-offset-4">Marketplace &rarr;</Link>
+            <!-- Marketplace CTA -->
+            <section class="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-black text-slate-800">Explore Marketplace</h2>
+                    <Link :href="route('central.home')" class="text-xs font-black text-blue-600 uppercase tracking-widest hover:underline">Browse All &rarr;</Link>
                 </div>
-                <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide snap-x">
-                    <div v-for="item in suggested" :key="item.id" class="snap-start flex-shrink-0 w-44 group cursor-pointer">
-                        <div class="aspect-square bg-slate-50 rounded-[2.5rem] border border-slate-100 flex items-center justify-center mb-4 group-hover:bg-blue-50 transition-all shadow-sm">
-                            <svg class="w-16 h-16 text-slate-300 group-hover:text-blue-400 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                        </div>
-                        <h4 class="font-bold text-slate-800 text-sm truncate uppercase">{{ item.name }}</h4>
-                        <p class="text-blue-600 font-black text-sm mt-1">{{ formatUSD(item.price) }}</p>
-                    </div>
+                <div class="text-center py-6">
+                    <Link :href="route('central.home')" class="inline-block bg-blue-600 text-white px-8 py-4 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">
+                        Go to Marketplace
+                    </Link>
                 </div>
             </section>
+
         </div>
 
+        <!-- Register Store Modal -->
         <div v-if="isModalOpen" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
             <div class="bg-white w-full max-w-xl rounded-[3rem] p-10 shadow-2xl animate-in zoom-in duration-300 relative overflow-hidden">
                 <div class="absolute top-0 left-0 h-1.5 bg-blue-600 transition-all duration-500" :style="{ width: (currentStep/3 * 100) + '%' }"></div>
@@ -231,7 +221,7 @@ const suggested = [
                         <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mt-2">Phase {{ currentStep }} of 3</p>
                     </div>
                     <button @click="isModalOpen = false" class="text-slate-300 hover:text-red-500 transition-colors">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
 
@@ -318,4 +308,3 @@ const suggested = [
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
-```

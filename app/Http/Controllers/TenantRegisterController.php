@@ -25,38 +25,28 @@ class TenantRegisterController extends Controller
             'zip_code'           => 'required|string',
             'agreement'          => 'accepted',
         ], [
-            'domain_id.unique' => 'This Domain Slug is already assigned to an active node. Please select a unique identifier.',
+            'domain_id.unique' => 'This store name is already taken. Please choose a different one.',
         ]);
 
-        try {
-            $tenant = Tenant::create([
-                'id'      => $slug,
-                'user_id' => auth()->id(),
-                'data'    => [
-                    'store_name'     => $request->store_display_name,
-                    'category'       => $request->category,
-                    'description'    => $request->description,
-                    'phone'          => $request->country_code . $request->phone,
-                    'address_detail' => $request->address_detail,
-                    'zip_code'       => $request->zip_code,
-                ]
-            ]);
+        $tenant = Tenant::create([
+            'id'      => $slug,
+            'user_id' => auth()->id(),
+            'data'    => [
+                'store_name'     => $request->store_display_name,
+                'category'       => $request->category,
+                'description'    => $request->description,
+                'phone'          => $request->country_code . $request->phone,
+                'address_detail' => $request->address_detail,
+                'zip_code'       => $request->zip_code,
+            ],
+        ]);
 
-            $tenant->domains()->create([
-                'domain' => $slug . '.localhost',
-            ]);
+        $tenant->domains()->create([
+            'domain' => $slug . '.localhost',
+        ]);
 
-            $storeUrl = 'http://' . $slug . '.localhost:8000/products';
+        $storeUrl = 'http://' . $slug . '.localhost:8000/products';
 
-            return redirect()->route('dashboard')->with('status', [
-                'hasStore'     => true,
-                'storeUrl'     => $storeUrl,
-                'storeName'    => $slug,
-                'storeDisplay' => $slug,
-            ]);
-
-        } catch (\Exception $e) {
-            return redirect()->route('dashboard');
-        }
+        return redirect()->route('dashboard')->with('success', 'Store created successfully!');
     }
 }
