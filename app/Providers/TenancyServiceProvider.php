@@ -10,13 +10,13 @@ use Illuminate\Support\ServiceProvider;
 use Stancl\JobPipeline\JobPipeline;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
-use Stancl\Tenancy\Listeners;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 class TenancyServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        //
     }
 
     public function boot()
@@ -27,22 +27,26 @@ class TenancyServiceProvider extends ServiceProvider
 
     protected function bootEvents()
     {
-        // Pastikan tidak ada kurung siku [] yang membungkus JobPipeline-nya babe
         Event::listen(Events\TenantCreated::class, JobPipeline::make([
             Jobs\CreateDatabase::class,
             Jobs\MigrateDatabase::class,
             Jobs\SeedDatabase::class,
         ])->send(function (Events\TenantCreated $event) {
             return $event->tenant;
-        })->shouldBeQueued(false)->toListener()); // Tambahkan ->toListener() biar Laravel paham
+        })->shouldBeQueued(false)->toListener());
     }
 
     protected function makeRoutes()
     {
-        Route::middleware([
-            'web',
-            \Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class,
-            \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
-        ])->group(base_path('routes/tenant.php'));
+        $centralDomains = config('tenancy.central_domains', ['localhost']);
+        $currentHost = request()->getHost();
+
+        if (!in_array($currentHost, $centralDomains)) {
+            Route::middleware([
+                'web',
+                InitializeTenancyByDomain::class,
+                PreventAccessFromCentralDomains::class,
+            ])->group(base_path('routes/tenant.php'));
+        }
     }
 }

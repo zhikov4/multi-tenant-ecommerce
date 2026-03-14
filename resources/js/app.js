@@ -1,6 +1,5 @@
 import '../css/app.css';
 import './bootstrap';
-
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
@@ -23,5 +22,14 @@ createInertiaApp({
     },
     progress: {
         color: '#4B5563',
+    },
+    navigate: (visit) => {
+        const url = new URL(visit.url);
+        const currentHost = window.location.hostname;
+        if (url.hostname !== currentHost) {
+            window.location.href = visit.url;
+            return false;
+        }
+        return true;
     },
 });

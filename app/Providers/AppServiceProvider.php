@@ -3,21 +3,24 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Config;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
     }
 
     public function boot(): void
     {
-        // Jika kita sedang di subdomain (tenant), paksa aset ke path absolut
-        if (request()->getHost() !== 'localhost' && request()->getHost() !== '127.0.0.1') {
+        $host = request()->getHost();
+        $isTenant = $host !== 'localhost' && $host !== '127.0.0.1';
+
+        if ($isTenant) {
             Config::set('app.asset_url', asset('/'));
+            Config::set('session.domain', '.' . $host);
+        } else {
+            Config::set('session.domain', 'localhost');
         }
     }
 }

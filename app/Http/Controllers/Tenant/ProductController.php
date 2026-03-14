@@ -23,18 +23,20 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name'  => 'required',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
         ]);
 
-        Product::create($request->all()); //
+        Product::create($request->all());
+
         return redirect()->back();
     }
 
     public function destroy(Product $product)
     {
-        $product->delete(); //
+        $product->delete();
+
         return redirect()->back();
     }
 }

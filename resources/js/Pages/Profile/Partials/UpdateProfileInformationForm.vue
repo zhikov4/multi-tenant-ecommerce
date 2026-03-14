@@ -1,7 +1,6 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 
@@ -18,12 +17,11 @@ const form = useForm({
     photo: null,
 });
 
-// FIX BUG: Upload file pake trik method spoofing di Laravel
 const submitProfile = () => {
     form.post(route('profile.update', { _method: 'patch' }), {
         forceFormData: true,
         preserveScroll: true,
-        onSuccess: () => form.reset('photo'), // Reset input foto setelah sukses
+        onSuccess: () => form.reset('photo'),
     });
 };
 </script>
@@ -36,7 +34,6 @@ const submitProfile = () => {
         </header>
 
         <form @submit.prevent="submitProfile" class="mt-6 space-y-6">
-            
             <div>
                 <InputLabel value="Profile Photo" class="text-slate-400 font-black uppercase tracking-widest text-xs" />
                 <div class="mt-2 flex items-center gap-4">

@@ -1,12 +1,27 @@
 <?php
 
 return [
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'build/*', 'assets/*', 'tenancy/assets/*'],
+
+    'paths' => ['api/*', 'sanctum/csrf-cookie', '*'],
+
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*'],
-    'allowed_origins_patterns' => [],
+
+    'allowed_origins' => [
+        'http://localhost:8000',
+        'http://tokocantik.localhost:8000',
+        'http://*.localhost:8000',
+    ],
+
+    'allowed_origins_patterns' => [
+        '/^http:\/\/.*\.localhost(:\d+)?$/',
+    ],
+
     'allowed_headers' => ['*'],
+
     'exposed_headers' => [],
+
     'max_age' => 0,
+
     'supports_credentials' => true,
+
 ];

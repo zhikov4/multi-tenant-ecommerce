@@ -1,43 +1,33 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, usePage } from '@inertiajs/vue3';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 
 const { props } = usePage();
 const storeName = props.status?.storeDisplay || props.status?.storeName || 'Store';
-const activeTab = ref('products'); 
 
-// --- STATE DATA ---
 const storeProducts = ref([]);
-const logFilter = ref('all');
 const activeDropdown = ref(null);
-const activeOrderDropdown = ref(null);
 const isAddEditModalOpen = ref(false);
-const isPreviewModalOpen = ref(false);
 const isDeleteModal1Open = ref(false);
 const isDeleteModal2Open = ref(false);
-const formMode = ref('add'); 
-const selectedProduct = ref(null);
+const formMode = ref('add');
 const itemToDelete = ref(null);
 
 const productForm = ref({ id: null, name: '', stock: 0, price: 0, status: 'Active', desc: '' });
 
-// --- FUNCTIONS ---
 const formatUSD = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
-const closeDropdowns = () => { 
-    activeDropdown.value = null; 
-    activeOrderDropdown.value = null; 
+const closeDropdowns = () => {
+    activeDropdown.value = null;
 };
 
 const fetchProducts = async () => {
     try {
         const response = await axios.get('/api/products');
         storeProducts.value = response.data;
-    } catch (e) {
-        console.error("Failed to fetch products from tenant database");
-    }
+    } catch (e) {}
 };
 
 const saveProduct = async () => {
@@ -81,8 +71,8 @@ const openEditModal = (product) => {
     isAddEditModalOpen.value = true;
 };
 
-const toggleDropdown = (id) => { 
-    activeDropdown.value = activeDropdown.value === id ? null : id; 
+const toggleDropdown = (id) => {
+    activeDropdown.value = activeDropdown.value === id ? null : id;
 };
 
 onMounted(() => {
@@ -166,6 +156,5 @@ onUnmounted(() => {
                 <button @click="isDeleteModal2Open = false" class="w-full py-2 text-slate-400 font-bold text-[10px]">ABORT</button>
             </div>
         </div>
-
     </AuthenticatedLayout>
 </template>

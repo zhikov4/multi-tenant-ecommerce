@@ -15,12 +15,13 @@ return [
         Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
         Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper::class,
         Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper::class,
-        Stancl\Tenancy\Bootstrappers\RedisTenancyBootstrapper::class,
+        // ✅ Redis dimatiin dulu karena tidak dipakai
+        // Stancl\Tenancy\Bootstrappers\RedisTenancyBootstrapper::class,
     ],
 
     'database' => [
-        'central_connection' => 'mysql', // Pusat pakai mysql
-        'template_tenant_connection' => 'tenant', // Tenant pakai jalur tenant
+        'central_connection' => 'mysql',
+        'template_tenant_connection' => 'tenant',
         'prefix' => 'tenant',
         'suffix' => '',
         'managers' => [
@@ -37,6 +38,9 @@ return [
     'seeder_parameters' => [
         '--force' => true,
     ],
+
+    // ✅ Session tidak ikut tenant, biar logout bisa cross-domain
+    'session_same_site' => 'lax',
 
     'home_url' => '/dashboard',
     'features' => [],

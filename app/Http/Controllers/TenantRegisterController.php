@@ -10,14 +10,12 @@ class TenantRegisterController extends Controller
 {
     public function store(Request $request)
     {
-        // Ubah nama toko jadi slug dulu sebelum di-cek ke database
         $slug = Str::slug($request->store_name);
         $request->merge(['domain_id' => $slug]);
 
-        // Validasi ketat untuk semua step
         $request->validate([
             'store_display_name' => 'required|string|max:255',
-            'domain_id'          => 'required|string|max:255|unique:tenants,id', // Cek apakah slug sudah dipakai
+            'domain_id'          => 'required|string|max:255|unique:tenants,id',
             'domain_extension'   => 'required',
             'description'        => 'required|string',
             'category'           => 'required',
@@ -27,7 +25,6 @@ class TenantRegisterController extends Controller
             'zip_code'           => 'required|string',
             'agreement'          => 'accepted',
         ], [
-            // Custom error message (Professional English)
             'domain_id.unique' => 'This Domain Slug is already assigned to an active node. Please select a unique identifier.',
         ]);
 
@@ -46,10 +43,17 @@ class TenantRegisterController extends Controller
             ]);
 
             $tenant->domains()->create([
-                'domain' => $slug . $request->domain_extension,
+                'domain' => $slug . '.localhost',
             ]);
 
-            return redirect()->route('dashboard');
+            $storeUrl = 'http://' . $slug . '.localhost:8000/products';
+
+            return redirect()->route('dashboard')->with('status', [
+                'hasStore'     => true,
+                'storeUrl'     => $storeUrl,
+                'storeName'    => $slug,
+                'storeDisplay' => $slug,
+            ]);
 
         } catch (\Exception $e) {
             return redirect()->route('dashboard');
