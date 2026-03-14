@@ -1,14 +1,10 @@
 <?php
-
 declare(strict_types=1);
 
-use Stancl\Tenancy\Database\Models\Domain;
-use Stancl\Tenancy\Database\Models\Tenant;
-
 return [
-    'tenant_model' => Tenant::class,
+    'tenant_model' => \App\Models\Tenant::class,
     'id_generator' => Stancl\Tenancy\UUIDGenerator::class,
-    'domain_model' => Domain::class,
+    'domain_model' => Stancl\Tenancy\Database\Models\Domain::class,
 
     'central_domains' => [
         'localhost',
@@ -23,12 +19,11 @@ return [
     ],
 
     'database' => [
-        'central_connection' => 'mysql',
-        'template_tenant_connection' => 'tenant',
+        'central_connection' => 'mysql', // Pusat pakai mysql
+        'template_tenant_connection' => 'tenant', // Tenant pakai jalur tenant
         'prefix' => 'tenant',
         'suffix' => '',
         'managers' => [
-            // Alamat yang sudah disesuaikan dengan hasil 'find' kamu babe:
             'mysql' => Stancl\Tenancy\TenantDatabaseManagers\MySQLDatabaseManager::class,
         ],
     ],
@@ -44,6 +39,5 @@ return [
     ],
 
     'home_url' => '/dashboard',
-
     'features' => [],
 ];

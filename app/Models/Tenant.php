@@ -10,13 +10,4 @@ use Stancl\Tenancy\Database\Concerns\HasDomains;
 class Tenant extends BaseTenant implements TenantWithDatabase
 {
     use HasDatabase, HasDomains;
-
-    public static function getCustomColumns(): array
-    {
-        return [
-            'id',
-            'user_id', // Menyambungkan toko ini dengan user yang membuatnya
-            'data',    // Menyimpan data JSON seperti nama toko, alamat, dll
-        ];
-    }
 }

@@ -1,48 +1,67 @@
-<script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
-</script>
-
 <template>
-    <Head title="Settings" />
+    <div class="flex min-h-screen bg-gray-50 font-sans">
+        <aside class="w-64 bg-white border-r shadow-sm flex flex-col fixed h-full">
+            <div class="p-6 font-black text-indigo-600 text-2xl border-b tracking-tighter italic">MYSTORE</div>
+            <nav class="flex-1 mt-4">
+                <Link href="/dashboard" class="block px-6 py-4 text-gray-500 font-bold hover:bg-indigo-50">DASHBOARD</Link>
+                <Link href="/products" class="block px-6 py-4 text-gray-500 font-bold hover:bg-indigo-50">MARKETPLACE</Link>
+                <Link href="/profile" class="block px-6 py-4 text-gray-500 font-bold hover:bg-indigo-50">MY PROFILE</Link>
+                <Link href="/settings" class="block px-6 py-4 text-indigo-600 bg-indigo-50 font-black border-r-4 border-indigo-600">SETTINGS</Link>
+            </nav>
+            <div class="p-6">
+                <Link href="/logout" method="post" as="button" class="w-full py-4 bg-red-500 text-white rounded-xl font-black text-xs uppercase tracking-widest">Log Out</Link>
+            </div>
+        </aside>
 
-    <AuthenticatedLayout>
-        <div class="max-w-4xl mx-auto space-y-8">
-            <header class="mb-8">
-                <h1 class="text-3xl sm:text-4xl font-black text-slate-900 flex items-center gap-3">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    Global Settings
-                </h1>
-                <p class="text-slate-500 mt-2 font-medium">Manage your notification and security preferences here.</p>
-            </header>
+        <main class="flex-1 ml-64 p-12">
+            <div class="max-w-3xl mx-auto">
+                <div class="flex items-center gap-4 mb-2">
+                    <span class="text-3xl">⚙️</span>
+                    <h1 class="text-3xl font-black text-gray-800 tracking-tight">Global Settings</h1>
+                </div>
+                <p class="text-gray-500 font-medium mb-10">Manage your notification and security preferences here.</p>
 
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                <div class="space-y-6">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-6">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-10 space-y-10">
+                    <div class="flex justify-between items-center">
                         <div>
-                            <h3 class="font-bold text-lg text-slate-800">Email Notifications</h3>
-                            <p class="text-sm text-slate-500">Receive emails for orders and promotions.</p>
+                            <h3 class="font-bold text-gray-800 text-lg">Email Notifications</h3>
+                            <p class="text-sm text-gray-400">Receive emails for orders and promotions.</p>
                         </div>
-                        <input type="checkbox" checked class="w-12 h-6 bg-slate-200 rounded-full appearance-none checked:bg-blue-600 transition-colors cursor-pointer relative after:absolute after:top-1 after:left-1 after:w-4 after:h-4 after:bg-white after:rounded-full checked:after:translate-x-6 after:transition-transform" />
+                        <button @click="emailNotif = !emailNotif" :class="emailNotif ? 'bg-blue-600' : 'bg-gray-200'" class="w-12 h-6 rounded-full transition-colors relative">
+                            <div :class="emailNotif ? 'translate-x-6' : 'translate-x-1'" class="absolute top-1 bg-white w-4 h-4 rounded-full transition-transform shadow-sm"></div>
+                        </button>
                     </div>
 
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-6">
+                    <div class="flex justify-between items-center pt-6 border-t border-gray-50">
                         <div>
-                            <h3 class="font-bold text-lg text-slate-800">Two-Factor Authentication</h3>
-                            <p class="text-sm text-slate-500">Add an extra layer of security to your account.</p>
+                            <h3 class="font-bold text-gray-800 text-lg">Two-Factor Authentication</h3>
+                            <p class="text-sm text-gray-400">Add an extra layer of security to your account.</p>
                         </div>
-                        <button class="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200">Enable 2FA</button>
+                        <button class="bg-gray-100 px-6 py-2 rounded-xl font-bold text-gray-700 hover:bg-gray-200 transition">Enable 2FA</button>
                     </div>
 
-                    <div class="flex items-center justify-between">
+                    <div class="flex justify-between items-center pt-10 border-t border-red-50">
                         <div>
-                            <h3 class="font-bold text-lg text-red-600">Danger Zone</h3>
-                            <p class="text-sm text-slate-500">Permanently delete your account and all data.</p>
+                            <h3 class="font-bold text-red-500 text-lg italic">Danger Zone</h3>
+                            <p class="text-sm text-gray-400">Permanently delete your account and all data.</p>
                         </div>
-                        <button class="px-4 py-2 border-2 border-red-100 text-red-600 font-bold rounded-xl hover:bg-red-50">Delete Account</button>
+                        <button @click="deleteAccount" class="border border-red-100 bg-red-50 text-red-500 px-6 py-2 rounded-xl font-bold hover:bg-red-500 hover:text-white transition">Delete Account</button>
                     </div>
                 </div>
             </div>
-        </div>
-    </AuthenticatedLayout>
+        </main>
+    </div>
 </template>
+
+<script setup>
+import { ref } from 'vue';
+import { Link } from '@inertiajs/vue3';
+
+const emailNotif = ref(true);
+
+const deleteAccount = () => {
+    if (confirm('Are you sure you want to delete this store account? This cannot be undone!')) {
+        alert('Action restricted for demo purposes, Honey! 🛡️');
+    }
+};
+</script>

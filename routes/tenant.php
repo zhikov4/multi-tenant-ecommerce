@@ -1,32 +1,28 @@
 <?php
-
 declare(strict_types=1);
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Tenant\ProductController;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 Route::middleware([
     'web',
-    \Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class,
-    \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,
 ])->group(function () {
+    Route::get('/', function () { return redirect('/products'); });
+    Route::resource('products', ProductController::class);
+    Route::get('/dashboard', function () { return Inertia::render('Dashboard'); })->name('dashboard');
+    Route::get('/profile', function () { return Inertia::render('Profile'); })->name('profile');
+    Route::get('/settings', function () { return Inertia::render('Settings'); })->name('settings');
 
-    // 1. Halaman Depan Toko (Storefront)
-    Route::get('/', function () {
-        return "<h1>Selamat Datang di Toko " . tenant('id') . "</h1><p>Akses <a href='/console'>/console</a> untuk manage produk.</p>";
-    });
-
-    // 2. Halaman Management Console (Halaman Vue Manage.vue)
-    Route::get('/console', function () {
-        return Inertia::render('Store/Manage');
-    })->name('tenant.console');
-
-    // 3. API untuk CRUD Produk
-    Route::prefix('api')->group(function () {
-        Route::get('/products', [ProductController::class, 'index']);
-        Route::post('/products', [ProductController::class, 'store']);
-        Route::put('/products/{product}', [ProductController::class, 'update']);
-        Route::delete('/products/{product}', [ProductController::class, 'destroy']);
-    });
+    // Logout Path Relatif (Requirements: User Auth)
+    Route::post('/logout', function () {
+        Auth::guard('web')->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect('/products');
+    })->name('logout');
 });

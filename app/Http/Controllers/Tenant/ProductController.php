@@ -5,36 +5,36 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        return response()->json(Product::latest()->get());
+        return Inertia::render('Products/Index', [
+            'products' => Product::latest()->get(),
+            'auth' => [
+                'user' => Auth::user()
+            ]
+        ]);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'stock' => 'required|integer',
+        $request->validate([
+            'name' => 'required',
             'price' => 'required|numeric',
+            'stock' => 'required|integer',
         ]);
 
-        $product = Product::create($validated);
-        return response()->json($product);
-    }
-
-    public function update(Request $request, Product $product)
-    {
-        $product->update($request->all());
-        return response()->json($product);
+        Product::create($request->all()); //
+        return redirect()->back();
     }
 
     public function destroy(Product $product)
     {
-        $product->delete();
-        return response()->json(['message' => 'Deleted']);
+        $product->delete(); //
+        return redirect()->back();
     }
 }
