@@ -4,43 +4,43 @@ namespace App\Http\Controllers\Central;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cart;
-use App\Models\Tenant;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request): Response
     {
-        $user = Auth::user();
+        $user = $request->user()->load('tenant.domains');
 
-        $userTenant = Tenant::where('user_id', $user->id)->first();
-        $storeUrl = null;
-        $storeName = null;
-        $storeDisplay = null;
+        $cartItems = Cart::with('product')
+            ->where('user_id', $user->id)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id'         => $item->id,
+                    'name'       => $item->product->name ?? 'Unknown',
+                    'price'      => $item->product->price ?? 0,
+                    'quantity'   => $item->quantity,
+                    'tenant_id'  => $item->tenant_id,
+                    'subtotal'   => ($item->product->price ?? 0) * $item->quantity,
+                ];
+            });
 
-        if ($userTenant) {
-            $domain = $userTenant->domains()->first();
-            if ($domain) {
-                $storeUrl     = 'http://' . $domain->domain . ':8000/products';
-                $storeName    = $userTenant->id;
-                $storeDisplay = $domain->domain;
-            }
+        $tenantDomain = null;
+        if ($user->tenant && $user->tenant->domains->isNotEmpty()) {
+            $tenantDomain = $user->tenant->domains->first()->domain;
         }
 
-        $cartItems = Cart::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
-
         return Inertia::render('Dashboard', [
-            'status' => [
-                'hasStore'     => (bool) $userTenant,
-                'storeUrl'     => $storeUrl,
-                'storeName'    => $storeName,
-                'storeDisplay' => $storeDisplay,
-            ],
-            'cartItems' => $cartItems,
+            'cartItems'    => $cartItems,
+            'cartTotal'    => $cartItems->sum('subtotal'),
+            'tenantDomain' => $tenantDomain,
+            'tenant'       => $user->tenant ? [
+                'id'   => $user->tenant->id,
+                'name' => $user->tenant->name ?? $user->tenant->id,
+            ] : null,
         ]);
     }
 }
