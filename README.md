@@ -15,19 +15,18 @@ Store owners register an account, create a store, and get a subdomain like `myst
 - Tailwind CSS
 
 ## Architecture
-```
-Central Database (multi_tenant_ecommerce)
-├── users         — registered accounts
-├── tenants       — store records
-├── domains       — subdomain per store
-├── carts         — shopping cart (central)
-└── sessions
 
-Tenant Database (one per store, e.g. tenanttopstore)
-├── users
-├── products
-└── carts
-```
+Central Database (multi_tenant_ecommerce)
+├── users         — registered central accounts
+├── tenants       — store records & metadata
+├── domains       — subdomain mapping
+└── sessions      — central session management
+
+Tenant Database (Dedicated per store)
+├── users         — tenant-specific user records
+├── products      — isolated product catalog
+└── carts         — isolated shopping cart data
+
 
 When a tenant is created, Stancl automatically provisions a new MySQL database and runs migrations into it. All product and order data lives inside that tenant's own database. The central database only knows about users, store metadata, and domains.
 
