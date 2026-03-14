@@ -11,6 +11,8 @@
         <testsuite name="Feature">
             <file>tests/Feature/ExampleTest.php</file>
             <file>tests/Feature/MyStoreTest.php</file>
+            <file>tests/Feature/AuthTest.php</file>
+            <file>tests/Feature/TenantIsolationTest.php</file>
         </testsuite>
     </testsuites>
     <source>
