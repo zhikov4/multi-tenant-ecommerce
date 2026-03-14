@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Tighten\Ziggy\Ziggy;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -20,14 +21,16 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            // Share flash message buat notifikasi buat toko berhasil
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),
             ],
-            // Share status toko ke semua komponen Vue
             'status' => fn () => $request->session()->get('status') ?? [
                 'hasStore' => false,
                 'storeUrl' => null,
+            ],
+            'ziggy' => fn () => [
+                ...(new Ziggy)->toArray(),
+                'location' => $request->url(),
             ],
         ]);
     }

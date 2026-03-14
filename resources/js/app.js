@@ -4,6 +4,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import { route } from '../../vendor/tightenco/ziggy';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -15,21 +16,13 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
+        const ziggyConfig = props.initialPage.props.ziggy ?? {};
         return createApp({ render: () => h(App, props) })
             .use(plugin)
-            .use(ZiggyVue)
+            .use(ZiggyVue, ziggyConfig)
             .mount(el);
     },
     progress: {
         color: '#4B5563',
-    },
-    navigate: (visit) => {
-        const url = new URL(visit.url);
-        const currentHost = window.location.hostname;
-        if (url.hostname !== currentHost) {
-            window.location.href = visit.url;
-            return false;
-        }
-        return true;
     },
 });
