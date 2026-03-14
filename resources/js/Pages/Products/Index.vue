@@ -4,7 +4,14 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { inject } from 'vue';
 
 const route = inject('route');
-defineProps({ products: Object });
+
+// Kita kasih default value supaya kalau datanya belum datang, aplikasi nggak crash
+const props = defineProps({ 
+    products: {
+        type: Object,
+        default: () => ({ data: [], links: [], last_page: 0 })
+    }
+});
 
 const formatUSD = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
@@ -36,7 +43,7 @@ const deleteProduct = (id) => {
                 ✅ {{ $page.props.flash.message }}
             </div>
 
-            <div v-if="products.data.length === 0"
+            <div v-if="(products?.data || []).length === 0"
                 class="text-center py-24 bg-white rounded-[3rem] border-2 border-dashed border-slate-200">
                 <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                 <p class="text-slate-400 font-black uppercase tracking-widest text-sm">No products yet</p>
@@ -44,7 +51,7 @@ const deleteProduct = (id) => {
             </div>
 
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div v-for="product in products.data" :key="product.id"
+                <div v-for="product in (products?.data || [])" :key="product.id"
                     class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all overflow-hidden group">
                     <div class="aspect-video bg-slate-50 flex items-center justify-center border-b border-slate-100">
                         <svg class="w-16 h-16 text-slate-300 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
@@ -81,8 +88,8 @@ const deleteProduct = (id) => {
                 </div>
             </div>
 
-            <div v-if="products.last_page > 1" class="flex justify-center gap-2 flex-wrap">
-                <Link v-for="link in products.links" :key="link.label"
+            <div v-if="(products?.last_page || 0) > 1" class="flex justify-center gap-2 flex-wrap">
+                <Link v-for="link in (products?.links || [])" :key="link.label"
                     :href="link.url || '#'"
                     :class="[
                         'px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all',

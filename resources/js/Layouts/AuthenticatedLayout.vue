@@ -15,7 +15,7 @@ const centralUrl = (path) => {
     return `${window.location.protocol}//localhost${port}${path}`
 }
 
-const userStores = computed(() => page.props.userStores ?? [])
+const userStores = computed(() => page.props?.userStores ?? [])
 
 const notifications = ref([
     { id: 1, title: 'Order #1024', desc: 'New payment confirmed', time: '2m ago', unread: true },

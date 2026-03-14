@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Tenant; 
+namespace App\Http\Controllers\Tenant;
 
-use App\Http\Controllers\Controller; 
+use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use Illuminate\Support\Facades\Cache;
@@ -13,7 +13,7 @@ class ProductController extends Controller
     public function index()
     {
         $products = Cache::remember('products_list', 3600, function () {
-            return Product::all();
+            return Product::latest()->paginate(10);
         });
 
         return Inertia::render('Products/Index', [
@@ -32,7 +32,7 @@ class ProductController extends Controller
 
         Cache::forget('products_list');
 
-        return redirect()->route('products.index');
+        return redirect()->route('products.index')->with('message', 'Product created successfully');
     }
 
     public function show(Product $product)
@@ -55,7 +55,7 @@ class ProductController extends Controller
 
         Cache::forget('products_list');
 
-        return redirect()->route('products.index');
+        return redirect()->route('products.index')->with('message', 'Product updated successfully');
     }
 
     public function destroy(Product $product)
@@ -64,6 +64,6 @@ class ProductController extends Controller
 
         Cache::forget('products_list');
 
-        return redirect()->route('products.index');
+        return redirect()->route('products.index')->with('message', 'Product deleted successfully');
     }
 }
