@@ -1,78 +1,69 @@
 <?php
 
-namespace App\Http\Controllers\Tenant;
+namespace App\Http\Controllers\Tenant; 
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controller; 
 use App\Models\Product;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Http\Requests\StoreProductRequest;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Tenant/Products/Index', [
-            'products' => Product::latest()->paginate(12),
-            'stats'    => [
-                'total_products'  => Product::count(),
-                'active_products' => Product::where('is_active', true)->count(),
-                'total_stock'     => Product::sum('stock'),
-                'total_value'     => number_format(Product::where('is_active', true)->sum(DB::raw('price * stock')), 2),
-            ],
+        $products = Cache::remember('products_list', 3600, function () {
+            return Product::all();
+        });
+
+        return Inertia::render('Products/Index', [
+            'products' => $products
         ]);
     }
 
     public function create()
     {
-        return Inertia::render('Tenant/Products/Create');
+        return Inertia::render('Products/Create');
     }
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price'       => 'required|numeric|min:0',
-            'stock'       => 'required|integer|min:0',
-            'category'    => 'nullable|string|max:100',
-            'sku'         => 'nullable|string|max:100|unique:products,sku',
-            'is_active'   => 'boolean',
+        Product::create($request->validated());
+
+        Cache::forget('products_list');
+
+        return redirect()->route('products.index');
+    }
+
+    public function show(Product $product)
+    {
+        return Inertia::render('Products/Show', [
+            'product' => $product
         ]);
-
-        Product::create($validated);
-
-        return redirect()->route('products.index')->with('success', 'Product created.');
     }
 
     public function edit(Product $product)
     {
-        return Inertia::render('Tenant/Products/Edit', [
-            'product' => $product,
+        return Inertia::render('Products/Edit', [
+            'product' => $product
         ]);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(StoreProductRequest $request, Product $product)
     {
-        $validated = $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price'       => 'required|numeric|min:0',
-            'stock'       => 'required|integer|min:0',
-            'category'    => 'nullable|string|max:100',
-            'sku'         => 'nullable|string|max:100|unique:products,sku,' . $product->id,
-            'is_active'   => 'boolean',
-        ]);
+        $product->update($request->validated());
 
-        $product->update($validated);
+        Cache::forget('products_list');
 
-        return redirect()->route('products.index')->with('success', 'Product updated.');
+        return redirect()->route('products.index');
     }
 
     public function destroy(Product $product)
     {
         $product->delete();
 
-        return redirect()->route('products.index')->with('success', 'Product deleted.');
+        Cache::forget('products_list');
+
+        return redirect()->route('products.index');
     }
 }
