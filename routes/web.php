@@ -9,15 +9,12 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::group(['domain' => 'localhost'], function () {
-
     Route::get('/', [WelcomeController::class, 'index'])->name('central.home');
-
     Route::get('/tenancy-assets/{path}', fn() => abort(404))->name('stancl.tenancy.asset');
 
-    require __DIR__.'/auth.php';
+    require __DIR__ . '/auth.php';
 
     Route::middleware(['auth', 'verified'])->group(function () {
-
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::get('/cart', [CartController::class, 'index'])->name('cart');
@@ -25,6 +22,9 @@ Route::group(['domain' => 'localhost'], function () {
         Route::patch('/cart/{cart}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
         Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
+
+        Route::get('/create-store', [TenantRegisterController::class, 'create'])->name('central.store.form');
+        Route::post('/create-store', [TenantRegisterController::class, 'store'])->name('central.store.create');
 
         Route::get('/my-stores/{id}', function ($id) {
             return Inertia::render('Store/Manage', ['storeId' => $id]);
@@ -35,7 +35,5 @@ Route::group(['domain' => 'localhost'], function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-        Route::post('/create-store', [TenantRegisterController::class, 'store'])->name('central.store.create');
     });
 });

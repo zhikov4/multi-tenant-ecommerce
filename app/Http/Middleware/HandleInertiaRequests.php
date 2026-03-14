@@ -17,17 +17,32 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
+        $user = $request->user();
+        $userStores = [];
+
+        if ($user) {
+            $user->loadMissing('tenant.domains');
+
+            if ($user->tenant && $user->tenant->domains->isNotEmpty()) {
+                $domain = $user->tenant->domains->first()->domain;
+                $port = ':8000';
+                $userStores[] = [
+                    'id'   => $user->tenant->id,
+                    'name' => $user->tenant->getInternal('store_name') ?? $user->tenant->id,
+                    'url'  => 'http://' . $domain . $port . '/products',
+                ];
+            }
+        }
+
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),
+                'success' => fn () => $request->session()->get('success'),
             ],
-            'status' => fn () => $request->session()->get('status') ?? [
-                'hasStore' => false,
-                'storeUrl' => null,
-            ],
+            'userStores' => $userStores,
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),

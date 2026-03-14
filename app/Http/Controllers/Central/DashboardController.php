@@ -19,12 +19,11 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'id'         => $item->id,
-                    'name'       => $item->product->name ?? 'Unknown',
-                    'price'      => $item->product->price ?? 0,
-                    'quantity'   => $item->quantity,
-                    'tenant_id'  => $item->tenant_id,
-                    'subtotal'   => ($item->product->price ?? 0) * $item->quantity,
+                    'id'       => $item->id,
+                    'name'     => $item->product->name ?? 'Unknown',
+                    'price'    => $item->product->price ?? 0,
+                    'quantity' => $item->quantity,
+                    'subtotal' => ($item->product->price ?? 0) * $item->quantity,
                 ];
             });
 

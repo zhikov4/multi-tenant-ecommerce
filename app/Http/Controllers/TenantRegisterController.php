@@ -3,14 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tenant;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TenantRegisterController extends Controller
 {
-    public function store(Request $request)
+    public function create(): Response
+    {
+        return Inertia::render('Store/Create');
+    }
+
+    public function store(Request $request): RedirectResponse
     {
         $slug = Str::slug($request->store_name);
+
         $request->merge(['domain_id' => $slug]);
 
         $request->validate([
@@ -32,20 +41,19 @@ class TenantRegisterController extends Controller
             'id'      => $slug,
             'user_id' => auth()->id(),
             'data'    => [
-                'store_name'     => $request->store_display_name,
-                'category'       => $request->category,
-                'description'    => $request->description,
-                'phone'          => $request->country_code . $request->phone,
-                'address_detail' => $request->address_detail,
-                'zip_code'       => $request->zip_code,
+                'tenancy_db_connection' => config('tenancy.database.template_tenant_connection'),
+                'store_name'            => $request->store_display_name,
+                'category'              => $request->category,
+                'description'           => $request->description,
+                'phone'                 => $request->country_code . $request->phone,
+                'address_detail'        => $request->address_detail,
+                'zip_code'              => $request->zip_code,
             ],
         ]);
 
         $tenant->domains()->create([
             'domain' => $slug . '.localhost',
         ]);
-
-        $storeUrl = 'http://' . $slug . '.localhost:8000/products';
 
         return redirect()->route('dashboard')->with('success', 'Store created successfully!');
     }
