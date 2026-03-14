@@ -1,104 +1,97 @@
-<template>
-    <div class="flex min-h-screen bg-gray-50 font-sans">
-        <aside class="w-64 bg-white border-r shadow-sm flex flex-col fixed h-full z-50">
-            <div class="p-6 font-black text-indigo-600 text-2xl border-b italic">
-                <a href="http://localhost:8000/">MYSTORE</a>
-            </div>
-            <nav class="flex-1 mt-4">
-                <a href="http://localhost:8000/dashboard" class="block px-6 py-4 text-gray-500 font-bold hover:bg-indigo-50">DASHBOARD</a>
-                <a href="/products" class="block px-6 py-4 text-indigo-600 bg-indigo-50 font-black border-r-4 border-indigo-600">MARKETPLACE</a>
-                <a href="http://localhost:8000/profile" class="block px-6 py-4 text-gray-500 font-bold hover:bg-indigo-50">MY PROFILE</a>
-                <a href="http://localhost:8000/settings" class="block px-6 py-4 text-gray-500 font-bold hover:bg-indigo-50">SETTINGS</a>
-            </nav>
-            <div class="p-6">
-                <button @click="handleLogout" class="w-full py-4 text-center bg-red-500 text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-lg hover:bg-red-600 transition">
-                    Log Out
-                </button>
-            </div>
-        </aside>
-
-        <main class="flex-1 ml-64 p-12">
-            <div class="max-w-4xl mx-auto">
-                <h1 class="text-3xl font-black text-gray-800 tracking-tight mb-10 uppercase text-center">Inventory Management</h1>
-
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-12">
-                    <form @submit.prevent="submit" class="flex flex-wrap gap-4 justify-center items-end">
-                        <div class="text-left">
-                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Product Name</label>
-                            <input v-model="form.name" type="text" class="w-full bg-gray-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 font-bold">
-                        </div>
-                        <div class="w-32 text-left">
-                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Price</label>
-                            <input v-model="form.price" type="number" class="w-full bg-gray-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 font-bold">
-                        </div>
-                        <div class="w-24 text-left">
-                            <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Stock</label>
-                            <input v-model="form.stock" type="number" class="w-full bg-gray-50 border-none rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 font-bold">
-                        </div>
-                        <button type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-black hover:bg-indigo-700 shadow-xl transition">Add Product</button>
-                    </form>
-                </div>
-
-                <div class="bg-white rounded-3xl shadow-sm border overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-gray-50/50">
-                            <tr>
-                                <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Price</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Stock</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-50">
-                            <tr v-for="product in products" :key="product.id" class="hover:bg-indigo-50/30 transition">
-                                <td class="px-8 py-6 font-bold text-gray-700 italic">{{ product.name }}</td>
-                                <td class="px-8 py-6 font-black text-indigo-600">Rp {{ Number(product.price).toLocaleString('id-ID') }}</td>
-                                <td class="px-8 py-6 text-center font-bold text-gray-500">{{ product.stock }}</td>
-                                <td class="px-8 py-6 text-right">
-                                    <button @click="deleteProduct(product.id)" class="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest">Delete</button>
-                                </td>
-                            </tr>
-                            <tr v-if="products.length === 0">
-                                <td colspan="4" class="px-8 py-12 text-center text-gray-400 font-bold">Belum ada produk. Tambahkan produk pertamamu! 🛍️</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
-</template>
-
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { inject } from 'vue';
 
-defineProps({ products: Array });
+const route = inject('route');
+defineProps({ products: Object });
 
-const form = useForm({ name: '', price: 0, stock: 0 });
-
-const submit = () => {
-    form.post('/products', { onSuccess: () => form.reset() });
-};
+const formatUSD = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 
 const deleteProduct = (id) => {
-    if (confirm('Yakin mau hapus produk ini?')) {
-        form.delete('/products/' + id);
+    if (confirm('Are you sure you want to delete this product?')) {
+        router.delete(route('products.destroy', id));
     }
 };
-
-const handleLogout = async () => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-    try {
-        await fetch('/logout', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrfToken,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-            },
-            credentials: 'include',
-        });
-    } catch (e) {}
-    window.location.href = 'http://localhost:8000/';
-};
 </script>
+
+<template>
+    <Head title="Products" />
+    <AuthenticatedLayout>
+        <div class="max-w-6xl mx-auto space-y-8 pb-20">
+
+            <header class="flex items-end justify-between">
+                <div>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Products</h1>
+                    <p class="text-slate-500 mt-2 font-medium">Manage your store's product catalog.</p>
+                </div>
+                <Link :href="route('products.create')"
+                    class="bg-blue-600 text-white px-8 py-3.5 rounded-2xl font-black shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all uppercase text-xs tracking-widest">
+                    + Add Product
+                </Link>
+            </header>
+
+            <div v-if="$page.props.flash?.message"
+                class="bg-green-50 border border-green-200 text-green-700 px-6 py-4 rounded-2xl font-bold text-sm">
+                ✅ {{ $page.props.flash.message }}
+            </div>
+
+            <div v-if="products.data.length === 0"
+                class="text-center py-24 bg-white rounded-[3rem] border-2 border-dashed border-slate-200">
+                <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                <p class="text-slate-400 font-black uppercase tracking-widest text-sm">No products yet</p>
+                <p class="text-slate-300 font-medium text-sm mt-2">Add your first product to get started.</p>
+            </div>
+
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="product in products.data" :key="product.id"
+                    class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all overflow-hidden group">
+                    <div class="aspect-video bg-slate-50 flex items-center justify-center border-b border-slate-100">
+                        <svg class="w-16 h-16 text-slate-300 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="min-w-0">
+                                <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">{{ product.category }}</p>
+                                <h3 class="font-black text-slate-900 text-lg leading-tight truncate">{{ product.name }}</h3>
+                            </div>
+                            <span :class="product.is_active ? 'bg-green-50 text-green-600 border-green-100' : 'bg-slate-100 text-slate-400 border-slate-200'"
+                                class="flex-shrink-0 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border">
+                                {{ product.is_active ? 'Active' : 'Draft' }}
+                            </span>
+                        </div>
+                        <p class="text-slate-400 text-sm font-medium line-clamp-2 mb-4 min-h-[2.5rem]">
+                            {{ product.description || 'No description provided.' }}
+                        </p>
+                        <div class="flex justify-between items-center mb-5">
+                            <p class="text-2xl font-black text-blue-600">{{ formatUSD(product.price) }}</p>
+                            <p class="text-xs font-black text-slate-400 uppercase">Stock: <span class="text-slate-700">{{ product.stock }}</span></p>
+                        </div>
+                        <div class="flex gap-2">
+                            <Link :href="route('products.edit', product.id)"
+                                class="flex-1 bg-slate-50 text-slate-700 py-3 rounded-2xl font-black text-xs uppercase tracking-widest text-center hover:bg-slate-900 hover:text-white transition-all border border-slate-200">
+                                Edit
+                            </Link>
+                            <button @click="deleteProduct(product.id)"
+                                class="flex-1 bg-red-50 text-red-500 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all border border-red-100">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="products.last_page > 1" class="flex justify-center gap-2 flex-wrap">
+                <Link v-for="link in products.links" :key="link.label"
+                    :href="link.url || '#'"
+                    :class="[
+                        'px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest transition-all',
+                        link.active ? 'bg-blue-600 text-white' : 'bg-white text-slate-500 border border-slate-200 hover:border-blue-300',
+                        !link.url ? 'opacity-40 pointer-events-none' : ''
+                    ]"
+                    v-html="link.label"
+                />
+            </div>
+        </div>
+    </AuthenticatedLayout>
+</template>

@@ -1,7 +1,8 @@
 <script setup>
 import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
 
+const route = inject('route');
 const { props } = usePage();
 
 const products = [
@@ -120,6 +121,7 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
             </div>
         </main>
 
+        <!-- Product Detail Modal -->
         <div v-if="isDetailModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click.self="isDetailModalOpen = false">
             <div class="bg-white w-full max-w-4xl rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row animate-in zoom-in duration-300 max-h-[95vh] overflow-y-auto">
                 <div class="md:w-1/2 bg-slate-50 p-6 sm:p-10 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100 min-w-0">
@@ -144,9 +146,7 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
                     <button @click="isDetailModalOpen = false" class="absolute top-4 right-4 sm:top-6 sm:right-8 text-slate-400 font-bold hover:text-red-500 flex items-center gap-1 bg-white rounded-full p-1 shadow-sm">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
-
                     <h3 class="text-lg sm:text-xl font-black text-slate-900 mb-4 sm:mb-6 border-b border-slate-100 pb-4 pr-8">Purchase Details</h3>
-
                     <div class="space-y-4 sm:space-y-5 flex-1">
                         <div>
                             <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Unit Price</p>
@@ -173,7 +173,6 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
                             <textarea v-model="purchaseForm.note" rows="2" placeholder="e.g. Please pack safely..." class="w-full mt-1 bg-slate-50 border-slate-200 rounded-2xl py-3 px-4 font-bold focus:ring-blue-500 outline-none"></textarea>
                         </div>
                     </div>
-
                     <div class="pt-4 sm:pt-6 border-t border-slate-100 mt-4 sm:mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <button @click="addToCart" class="flex-1 bg-white text-slate-700 py-3 sm:py-4 rounded-2xl font-black hover:bg-slate-50 transition-all border-2 border-slate-200 text-sm sm:text-base">Add to Cart</button>
                         <button @click="proceedToCheckout" class="flex-1 bg-blue-600 text-white py-3 sm:py-4 rounded-2xl font-black hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all flex justify-center items-center gap-2 text-sm sm:text-base">Buy Now 🛒</button>
@@ -182,6 +181,7 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
             </div>
         </div>
 
+        <!-- Checkout Modal -->
         <div v-if="isCheckoutModalOpen" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md" @click.self="isCheckoutModalOpen = false">
             <div class="bg-white w-full max-w-xl rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 shadow-2xl animate-in zoom-in duration-300 max-h-[95vh] overflow-y-auto min-w-0">
                 <div class="flex justify-between items-center mb-6">
@@ -232,6 +232,7 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
             </div>
         </div>
 
+        <!-- Login Modal -->
         <div v-if="showLoginModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" @click.self="showLoginModal = false">
             <div class="bg-white w-full max-w-md rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl animate-in zoom-in duration-300 min-w-0">
                 <div class="flex justify-between items-center mb-4 sm:mb-6">
@@ -241,9 +242,7 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
                     </h2>
                     <button @click="showLoginModal = false" class="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
-
                 <p class="text-slate-500 text-sm mb-6 font-medium">Please sign in to continue.</p>
-
                 <form @submit.prevent="submitLogin" class="space-y-4 min-w-0">
                     <div>
                         <input v-model="loginForm.email" type="email" placeholder="Email" class="w-full bg-slate-50 border-slate-200 rounded-2xl py-3 px-5 font-bold focus:ring-blue-500 outline-none min-w-0" required />
@@ -258,7 +257,6 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
                         <span>{{ loginForm.processing ? 'Processing...' : 'Sign In' }}</span>
                     </button>
                 </form>
-
                 <div class="mt-6 text-center border-t border-slate-100 pt-6 min-w-0">
                     <p class="text-sm font-bold text-slate-500 flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-2">
                         Don't have an account?
@@ -268,6 +266,7 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
             </div>
         </div>
 
+        <!-- Register Modal -->
         <div v-if="showRegisterModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" @click.self="showRegisterModal = false">
             <div class="bg-white w-full max-w-md rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl animate-in zoom-in duration-300 max-h-[90vh] overflow-y-auto min-w-0">
                 <div class="flex justify-between items-center mb-4 sm:mb-6">
@@ -277,9 +276,7 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
                     </h2>
                     <button @click="showRegisterModal = false" class="text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
-
                 <p class="text-slate-500 text-sm mb-6 font-medium">Create a new account. It's quick and free.</p>
-
                 <form @submit.prevent="submitRegister" class="space-y-4 min-w-0">
                     <div>
                         <input v-model="registerForm.name" type="text" placeholder="Name" class="w-full bg-slate-50 border-slate-200 rounded-2xl py-3 px-5 font-bold focus:ring-blue-500 outline-none min-w-0" required />
@@ -302,7 +299,6 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
                         <span>{{ registerForm.processing ? 'Processing...' : 'Register Now' }}</span>
                     </button>
                 </form>
-
                 <div class="mt-6 text-center border-t border-slate-100 pt-6 min-w-0">
                     <p class="text-sm font-bold text-slate-500 flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-2">
                         Already have an account?

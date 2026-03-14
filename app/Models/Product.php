@@ -3,9 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
-    // Pastikan bener-bener bersih, gak ada $connection di sini!
-    protected $fillable = ['name', 'description', 'stock', 'price', 'status'];
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'description',
+        'price',
+        'stock',
+        'category',
+        'sku',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'price'     => 'decimal:2',
+        'stock'     => 'integer',
+        'is_active' => 'boolean',
+    ];
 }
