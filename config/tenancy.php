@@ -2,36 +2,48 @@
 
 declare(strict_types=1);
 
-return [
-    'tenant_model' => \App\Models\Tenant::class,
-    'id_generator' => \Stancl\Tenancy\UUIDGenerator::class,
+use Stancl\Tenancy\Database\Models\Domain;
+use Stancl\Tenancy\Database\Models\Tenant;
 
-    // JURUS ANTI-404: Daftarkan semua host pusat di sini
+return [
+    'tenant_model' => Tenant::class,
+    'id_generator' => Stancl\Tenancy\UUIDGenerator::class,
+    'domain_model' => Domain::class,
+
     'central_domains' => [
-        '127.0.0.1',
         'localhost',
-        'localhost:8000',
+    ],
+
+    'bootstrappers' => [
+        Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper::class,
+        Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
+        Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper::class,
+        Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper::class,
+        Stancl\Tenancy\Bootstrappers\RedisTenancyBootstrapper::class,
     ],
 
     'database' => [
-        'central_connection' => env('DB_CONNECTION', 'mysql'),
-        'template_tenant_connection' => null,
+        'central_connection' => 'mysql',
+        'template_tenant_connection' => 'tenant',
         'prefix' => 'tenant',
         'suffix' => '',
         'managers' => [
-            'mysql' => \Stancl\Tenancy\TenantDatabaseManagers\MySQLDatabaseManager::class,
+            // Alamat yang sudah disesuaikan dengan hasil 'find' kamu babe:
+            'mysql' => Stancl\Tenancy\TenantDatabaseManagers\MySQLDatabaseManager::class,
         ],
     ],
 
-    'routes' => false, // Kita handle rute manual di web.php dan tenant.php
-    'assets' => ['asset_helper' => false, 'central_host' => 'localhost'],
-    'storage' => ['suffix_base' => 'tenant', 'disks' => ['local', 'public']],
-    'resource_splitting' => ['migrations' => ['tenant_path' => database_path('migrations/tenant')]],
-    
-    'bootstrappers' => [
-        \Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper::class,
-        \Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper::class,
-        \Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper::class,
-        \Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper::class,
+    'migration_parameters' => [
+        '--force' => true,
+        '--path' => [database_path('migrations/tenant')],
+        '--realpath' => true,
     ],
+
+    'seeder_parameters' => [
+        '--force' => true,
+    ],
+
+    'home_url' => '/dashboard',
+
+    'features' => [],
 ];

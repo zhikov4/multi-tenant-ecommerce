@@ -2,27 +2,31 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Tenant\ProductController;
 use Illuminate\Support\Facades\Route;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use App\Http\Controllers\Tenant\ProductController;
+use Inertia\Inertia;
 
 Route::middleware([
     'web',
-    InitializeTenancyByDomain::class,
-    PreventAccessFromCentralDomains::class,
+    \Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class,
+    \Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,
 ])->group(function () {
-    
-    Route::prefix('seller')->name('tenant.')->group(function () {
-        Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-        Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-        Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+
+    // 1. Halaman Depan Toko (Storefront)
+    Route::get('/', function () {
+        return "<h1>Selamat Datang di Toko " . tenant('id') . "</h1><p>Akses <a href='/console'>/console</a> untuk manage produk.</p>";
     });
 
-    Route::get('/', function () {
-        return redirect()->route('tenant.products.index');
+    // 2. Halaman Management Console (Halaman Vue Manage.vue)
+    Route::get('/console', function () {
+        return Inertia::render('Store/Manage');
+    })->name('tenant.console');
+
+    // 3. API untuk CRUD Produk
+    Route::prefix('api')->group(function () {
+        Route::get('/products', [ProductController::class, 'index']);
+        Route::post('/products', [ProductController::class, 'store']);
+        Route::put('/products/{product}', [ProductController::class, 'update']);
+        Route::delete('/products/{product}', [ProductController::class, 'destroy']);
     });
 });
-
-// FIX ERROR 500: Panggil rute bawaan stancl/tenancy di sini biar mesinnya nggak bingung
-\Stancl\Tenancy\Controllers\TenantAssetController::class;
