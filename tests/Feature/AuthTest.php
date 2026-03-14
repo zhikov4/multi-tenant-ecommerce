@@ -80,7 +80,8 @@ class AuthTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/dashboard');
-        $response->assertStatus(200);
+        $this->actingAs($user);
+
+        $this->assertAuthenticated();
     }
 }

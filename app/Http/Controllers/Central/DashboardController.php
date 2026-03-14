@@ -12,24 +12,23 @@ class DashboardController extends Controller
 {
     public function index(Request $request): Response
     {
-        $user = $request->user()->load('tenant.domains');
-
+        $user       = $request->user();
+        $userStores = [];
         $tenantDomain = null;
-        $userStores   = [];
 
         $tenants = Tenant::where('user_id', $user->id)->with('domains')->get();
 
         foreach ($tenants as $tenant) {
             if ($tenant->domains->isNotEmpty()) {
                 $domain = $tenant->domains->first()->domain;
-                $port   = request()->getPort() !== '80' && request()->getPort() !== '443'
-                    ? ':' . request()->getPort()
-                    : '';
+                $scheme = $request->getScheme();
+                $port   = $request->getPort();
+                $portStr = ($port != '80' && $port != '443') ? ':' . $port : '';
 
                 $userStores[] = [
                     'id'   => $tenant->id,
                     'name' => $tenant->getInternal('store_name') ?? $tenant->id,
-                    'url'  => request()->getScheme() . '://' . $domain . $port . '/products',
+                    'url'  => $scheme . '://' . $domain . $portStr . '/products',
                 ];
 
                 if (is_null($tenantDomain)) {
