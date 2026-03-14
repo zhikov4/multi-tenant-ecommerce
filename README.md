@@ -39,6 +39,20 @@ composer install
 npm install && npm run build
 cp .env.example .env
 php artisan key:generate
+```
+
+Edit `.env` and set your database credentials:
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=multi_tenant_ecommerce
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Then run:
+```bash
 php artisan migrate
 php artisan serve
 ```
@@ -47,6 +61,13 @@ Add tenant subdomains to `/etc/hosts`:
 ```
 127.0.0.1 mystore.localhost
 127.0.0.1 topstore.localhost
+```
+
+## Vendor Patch
+
+This project includes a fix to `vendor/stancl/tenancy/src/DatabaseConfig.php` to resolve a driver resolution bug in Stancl Tenancy v3.9. After running `composer install`, reapply the patch by copying the fixed file:
+```bash
+cp patches/DatabaseConfig.php vendor/stancl/tenancy/src/DatabaseConfig.php
 ```
 
 ## Creating a Store
@@ -64,7 +85,3 @@ php artisan test
 ```
 
 Tests cover tenant isolation, product CRUD per tenant, and the full auth flow.
-
-## Notes
-
-The `vendor/stancl/tenancy/src/DatabaseConfig.php` file has a small patch applied to fix a driver resolution bug in v3.9 when `template_tenant_connection` is set. If you run `composer install` fresh, reapply the patch or the tenant connection will fail with `DatabaseManagerNotRegisteredException`.
