@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use Stancl\JobPipeline\JobPipeline;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
@@ -27,27 +28,27 @@ class TenancyServiceProvider extends ServiceProvider
 
     protected function bootEvents(): void
     {
-        $events = [
-            Events\TenantCreated::class => [
+        Event::listen(
+            Events\TenantCreated::class,
+            JobPipeline::make([
                 Jobs\CreateDatabase::class,
                 Jobs\MigrateDatabase::class,
-            ],
-            Events\TenantDeleted::class => [
-                Jobs\DeleteDatabase::class,
-            ],
-            Events\TenancyInitialized::class => [
-                Listeners\BootstrapTenancy::class,
-            ],
-            Events\TenancyEnded::class => [
-                Listeners\RevertToCentralContext::class,
-            ],
-        ];
+            ])->send(function (Events\TenantCreated $event) {
+                return $event->tenant;
+            })->shouldBeQueued(false)->toListener()
+        );
 
-        foreach ($events as $event => $listeners) {
-            foreach ($listeners as $listener) {
-                Event::listen($event, $listener);
-            }
-        }
+        Event::listen(
+            Events\TenantDeleted::class,
+            JobPipeline::make([
+                Jobs\DeleteDatabase::class,
+            ])->send(function (Events\TenantDeleted $event) {
+                return $event->tenant;
+            })->shouldBeQueued(false)->toListener()
+        );
+
+        Event::listen(Events\TenancyInitialized::class, Listeners\BootstrapTenancy::class);
+        Event::listen(Events\TenancyEnded::class, Listeners\RevertToCentralContext::class);
     }
 
     protected function makeTenancyMiddlewareHighestPriority(): void

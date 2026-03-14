@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Central;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cart;
+use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,31 +14,38 @@ class DashboardController extends Controller
     {
         $user = $request->user()->load('tenant.domains');
 
-        $cartItems = Cart::with('product')
-            ->where('user_id', $user->id)
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id'       => $item->id,
-                    'name'     => $item->product->name ?? 'Unknown',
-                    'price'    => $item->product->price ?? 0,
-                    'quantity' => $item->quantity,
-                    'subtotal' => ($item->product->price ?? 0) * $item->quantity,
-                ];
-            });
-
         $tenantDomain = null;
-        if ($user->tenant && $user->tenant->domains->isNotEmpty()) {
-            $tenantDomain = $user->tenant->domains->first()->domain;
+        $userStores   = [];
+
+        $tenants = Tenant::where('user_id', $user->id)->with('domains')->get();
+
+        foreach ($tenants as $tenant) {
+            if ($tenant->domains->isNotEmpty()) {
+                $domain = $tenant->domains->first()->domain;
+                $port   = request()->getPort() !== '80' && request()->getPort() !== '443'
+                    ? ':' . request()->getPort()
+                    : '';
+
+                $userStores[] = [
+                    'id'   => $tenant->id,
+                    'name' => $tenant->getInternal('store_name') ?? $tenant->id,
+                    'url'  => request()->getScheme() . '://' . $domain . $port . '/products',
+                ];
+
+                if (is_null($tenantDomain)) {
+                    $tenantDomain = $domain;
+                }
+            }
         }
 
         return Inertia::render('Dashboard', [
-            'cartItems'    => $cartItems,
-            'cartTotal'    => $cartItems->sum('subtotal'),
+            'userStores'   => $userStores,
+            'cartItems'    => [],
+            'cartTotal'    => 0,
             'tenantDomain' => $tenantDomain,
-            'tenant'       => $user->tenant ? [
-                'id'   => $user->tenant->id,
-                'name' => $user->tenant->name ?? $user->tenant->id,
+            'tenant'       => $tenants->first() ? [
+                'id'   => $tenants->first()->id,
+                'name' => $tenants->first()->getInternal('store_name') ?? $tenants->first()->id,
             ] : null,
         ]);
     }

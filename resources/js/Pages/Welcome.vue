@@ -15,10 +15,12 @@ const selectedProduct = ref(null);
 const isDetailModalOpen = ref(false);
 const showLoginModal = ref(false);
 const showRegisterModal = ref(false);
+const showLogoutModal = ref(false);
 const purchaseQty = ref(1);
 
 const loginForm = useForm({ email: '', password: '', remember: false });
 const registerForm = useForm({ name: '', email: '', password: '', password_confirmation: '' });
+const logoutForm = useForm({});
 
 const openDetail = (product) => {
     selectedProduct.value = product;
@@ -60,6 +62,12 @@ const submitRegister = () => {
     });
 };
 
+const confirmLogout = () => {
+    logoutForm.post(route('logout'), {
+        onSuccess: () => { showLogoutModal.value = false; },
+    });
+};
+
 const switchToRegister = () => { showLoginModal.value = false; showRegisterModal.value = true; };
 const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.value = true; };
 </script>
@@ -80,6 +88,9 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
                         </Link>
                         <Link :href="route('dashboard')" class="bg-slate-900 text-white px-5 py-2 rounded-xl font-bold hover:bg-blue-600 transition-all text-sm">Dashboard</Link>
+                        <button @click="showLogoutModal = true" class="bg-red-50 text-red-600 px-5 py-2 rounded-xl font-bold hover:bg-red-100 transition-all text-sm">
+                            Log Out
+                        </button>
                     </template>
                     <template v-else>
                         <button @click="showLoginModal = true" class="font-bold text-slate-600 hover:text-blue-600 px-3 text-sm">Sign In</button>
@@ -115,7 +126,6 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
             </div>
         </main>
 
-        <!-- Product Detail Modal -->
         <div v-if="isDetailModalOpen && selectedProduct" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click.self="isDetailModalOpen = false">
             <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-8">
                 <div class="flex justify-between items-start mb-6">
@@ -128,14 +138,11 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-
                 <p v-if="selectedProduct.description" class="text-slate-500 text-sm mb-6">{{ selectedProduct.description }}</p>
-
                 <div class="flex justify-between items-center mb-6">
                     <p class="text-3xl font-black text-blue-600">${{ Number(selectedProduct.price).toFixed(2) }}</p>
                     <p class="text-sm text-slate-400">{{ selectedProduct.stock }} in stock</p>
                 </div>
-
                 <div class="flex items-center gap-4 mb-6">
                     <label class="text-sm font-bold text-slate-600">Qty</label>
                     <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl p-1">
@@ -144,14 +151,30 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
                         <button @click="purchaseQty < selectedProduct.stock ? purchaseQty++ : null" class="w-8 h-8 rounded-lg bg-white shadow-sm font-bold text-slate-500 hover:text-blue-600">+</button>
                     </div>
                 </div>
-
                 <button @click="addToCart" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
                     Add to Cart 🛒
                 </button>
             </div>
         </div>
 
-        <!-- Login Modal -->
+        <div v-if="showLogoutModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" @click.self="showLogoutModal = false">
+            <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center">
+                <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                </div>
+                <h2 class="text-2xl font-black text-slate-900 mb-2">Log Out?</h2>
+                <p class="text-slate-500 text-sm mb-8">Are you sure you want to log out of your account?</p>
+                <div class="flex gap-3">
+                    <button @click="showLogoutModal = false" class="flex-1 bg-slate-100 text-slate-700 py-3 rounded-2xl font-bold hover:bg-slate-200 transition-all">
+                        Cancel
+                    </button>
+                    <button @click="confirmLogout" :disabled="logoutForm.processing" class="flex-1 bg-red-600 text-white py-3 rounded-2xl font-bold hover:bg-red-700 transition-all disabled:opacity-50">
+                        {{ logoutForm.processing ? 'Logging out...' : 'Log Out' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div v-if="showLoginModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" @click.self="showLoginModal = false">
             <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl">
                 <div class="flex justify-between items-center mb-6">
@@ -173,7 +196,6 @@ const switchToLogin = () => { showRegisterModal.value = false; showLoginModal.va
             </div>
         </div>
 
-        <!-- Register Modal -->
         <div v-if="showRegisterModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" @click.self="showRegisterModal = false">
             <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl">
                 <div class="flex justify-between items-center mb-6">

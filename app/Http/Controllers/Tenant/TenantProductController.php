@@ -9,10 +9,6 @@ class TenantProductController extends Controller
 {
     public function index()
     {
-        // Kita paksa Laravel untuk mengambil produk lewat koneksi 'tenant'
-        $products = Product::on('tenant')->get();
-
-        // Kita kembalikan sebagai JSON untuk testing biar gampang
-        return response()->json($products);
+        return response()->json(Product::latest()->get());
     }
 }

@@ -14,6 +14,14 @@ Route::group(['domain' => 'localhost'], function () {
 
     require __DIR__ . '/auth.php';
 
+    Route::get('/debug-config', function() {
+        return response()->json([
+            'template_connection' => config('tenancy.database.template_tenant_connection'),
+            'driver' => config('database.connections.tenant.driver'),
+            'central' => config('tenancy.database.central_connection'),
+        ]);
+    });
+
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -13,6 +14,12 @@ class ProductController extends Controller
     {
         return Inertia::render('Tenant/Products/Index', [
             'products' => Product::latest()->paginate(12),
+            'stats'    => [
+                'total_products'  => Product::count(),
+                'active_products' => Product::where('is_active', true)->count(),
+                'total_stock'     => Product::sum('stock'),
+                'total_value'     => number_format(Product::where('is_active', true)->sum(DB::raw('price * stock')), 2),
+            ],
         ]);
     }
 
@@ -65,6 +72,7 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
+
         return redirect()->route('products.index')->with('success', 'Product deleted.');
     }
 }
